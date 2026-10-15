@@ -1,0 +1,90 @@
+% ELT-1031 Lab NN -- <lab title>
+% Build: latexmk -lualatex phelan-labNN.tex
+\documentclass{phelanlab}
+
+\graphicspath{{figures/}}
+
+% ---------- Shorthands ----------
+% Circuit quantities: upright with a real subscript in text, italic in maths.
+\newquantity{\Vs}{V}{S}
+\newquantity{\Vth}{V}{TH}
+\newquantity{\Rth}{R}{TH}
+\newquantity{\Req}{R}{EQ}
+
+\title{Lab Title from the Handout}
+\author{Leonard H Phelan IV}
+\date{2026-10-12}            % lab date, YYYY-MM-DD
+\labnumber{NN}
+% \course{ELT-1031}          % default
+% \instructor{prof. Hartwell}
+\footertext{Phelan \textendash\ ELT-1031 \textendash\ Lab NN}
+
+\begin{document}
+\maketitle
+
+% =====================================================================
+\section*{Objective}
+
+One paragraph on what the lab sets out to show. Numbers and units go through
+\verb|\qty|, which keeps them together on one line: \qty{10.01}{\volt},
+\qty{2.3}{\percent}, \qtyrange{0.7}{2.7}{\percent}. Labels and their numbers
+take a tie: Part~I, Table~\ref{tab:example}.
+
+\section*{Equipment}
+
+Siglent SPD3303X-E DC power supply; Siglent SDM3055A bench DMM; NI Multisim.
+
+% =====================================================================
+\section{Part I: First Part Title}
+
+In text, \Vth{} and \Rth{} are upright with real subscripts. In maths the
+letter is italic:
+\begin{equation*}
+  \Rth = \qty{100}{\ohm} + (\qty{300}{\ohm} \parallel \qty{200}{\ohm})
+       = \qty{220}{\ohm}
+\end{equation*}
+
+\subsection{Measurements}
+
+% Column widths are weights: X[2] is twice as wide as X[1].
+\begin{table}
+  \begin{labtable}{X[1.4]X[1]X[1]X[1]}
+    Quantity & Calculated & Measured & err \\
+    \Vs      & \qty{10.00}{\volt} & \qty{10.01}{\volt} & \qty{+0.10}{\percent} \\
+    \Vth     & \qty{6.000}{\volt} & \qty{6.02}{\volt}  & \qty{+0.33}{\percent} \\
+    \Rth     & \qty{220.0}{\ohm}  & \pending           & \pending \\
+  \end{labtable}
+  \caption{Every table has its caption below it.}
+  \label{tab:example}
+\end{table}
+
+% \fig{width as a fraction of the text width}{file}{caption}{label}
+% \fig{0.6}{p1-ms-original}{Original circuit in Multisim.}{fig:p1-ms-original}
+
+\subsection{Results}
+
+What the numbers show.
+
+% =====================================================================
+\section*{Questions}
+
+\begin{question}
+  Restate the handout question here.
+\end{question}
+\begin{answer}
+  The answer, indented under the question and kept on one page.
+\end{answer}
+
+\begin{question}[Q2b]
+  A question with its own label, for when the handout numbering isn't 1, 2, 3.
+\end{question}
+\begin{answer}
+  Another answer.
+\end{answer}
+
+% =====================================================================
+\section*{Errors and Difficulties}
+
+What went wrong and what was done about it.
+
+\end{document}
