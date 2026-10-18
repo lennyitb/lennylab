@@ -17,3 +17,6 @@ sandbox/
 
 # The showcase report ships its PDF
 !showcase/phelan-lab06.pdf
+
+# Editor settings
+.vscode/
