@@ -1,9 +1,11 @@
 #!/usr/bin/env python3
 """phelan-lab06.pdf -> pages/page-N.png for the README.
 
-Renders the cover and pages 2, 3 and 5 at 150 dpi with pdftoppm and draws a
-hairline grey border inside each edge, so the white pages show their edges
-on a white background.
+Renders the cover and pages 2, 3 and 5 with pdftoppm and draws a hairline
+border inside each edge, so the white pages show their edges on a white
+background. GitHub shows README images 838 CSS px wide on desktop; at twice
+that, a 2 px border lands on whole screen pixels on a 2x display and matches
+the 1 px frame around the README in GitHub's border grey.
 
 Run it with python3 -I make-screenshots.py after building the PDF; it needs
 pdftoppm (poppler) and Pillow.
@@ -17,14 +19,15 @@ HERE = Path(__file__).resolve().parent
 PDF = HERE / "phelan-lab06.pdf"
 OUT = HERE / "pages"
 PAGES = [1, 2, 3, 5]
-DPI = 150
-BORDER = (175, 184, 193)  # mid grey; paler greys vanish once GitHub scales the image
-WIDTH = 3                 # px at 150 dpi; about 2 px as GitHub scales it down
+WIDTH_PX = 1676            # 2 x 838 CSS px
+BORDER = (209, 217, 224)   # GitHub's --borderColor-default, #d1d9e0
+WIDTH = 2                  # px; 1 CSS px on GitHub
 
 OUT.mkdir(exist_ok=True)
 for p in PAGES:
     stem = OUT / f"page-{p}"
-    subprocess.run(["pdftoppm", "-png", "-r", str(DPI), "-f", str(p),
+    subprocess.run(["pdftoppm", "-png", "-scale-to-x", str(WIDTH_PX),
+                    "-scale-to-y", "-1", "-f", str(p),
                     "-l", str(p), "-singlefile", str(PDF), str(stem)],
                    check=True)
     png = stem.with_suffix(".png")
