@@ -18,8 +18,8 @@ PDF = HERE / "phelan-lab06.pdf"
 OUT = HERE / "pages"
 PAGES = [1, 2, 3, 5]
 DPI = 150
-BORDER = (208, 215, 222)  # GitHub's own border grey, reads in light and dark
-WIDTH = 2                 # px at 150 dpi; about 1 px as GitHub scales it down
+BORDER = (175, 184, 193)  # mid grey; paler greys vanish once GitHub scales the image
+WIDTH = 3                 # px at 150 dpi; about 2 px as GitHub scales it down
 
 OUT.mkdir(exist_ok=True)
 for p in PAGES:
