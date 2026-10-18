@@ -11,12 +11,11 @@ The sample below is a real report of mine, an RC transient lab. Its source and P
 
 ## Inside
 
-- `phelanbook.cls`: the Tufte-inspired layout
-- `phelanstyle.sty`: the shared house style (fonts, colours, tables, units, question and answer boxes)
-- `phelanlab.cls`: the earlier single-column class, on the same house style
+- `phelanlab.cls`: the document class
 - `showcase/`: the report above, with its pgfplots and circuitikz sources
+- `template/`: a blank report to start from
 
-It builds with LuaLaTeX and needs Minion Pro, Myriad Pro and STIX Two Math installed. The comments at the top of each class list its commands.
+It builds with LuaLaTeX and needs Minion Pro, Myriad Pro and STIX Two Math installed. The comments at the top of the class list its commands.
 
 ## License
 

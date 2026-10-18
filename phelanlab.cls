@@ -1,8 +1,8 @@
-% phelanbook.cls -- Lenny Phelan's house style on a Tufte-style page
+% phelanlab.cls -- Lenny Phelan's lab report style on a Tufte-style page
 %
 % A narrow text column with a wide note margin on the right, a full cover
-% page, and blocks that can span both. Fonts, colours, tables, units and the
-% question/answer boxes are the same as phelanlab.cls (phelanstyle.sty).
+% page, and blocks that can span both. Minion Pro text, Myriad Pro headings,
+% house tables, units and question/answer boxes.
 % Compile with LuaLaTeX:  latexmk -lualatex report.tex
 %
 % Page (letter, one-sided):
@@ -10,7 +10,7 @@
 %   Full width (text + gap + margin) is 7.25 in: \fulltextwidth.
 %
 % Usage:
-%   \documentclass{phelanbook}
+%   \documentclass{phelanlab}
 %   \title{RC Transient Response}
 %   \author{Leonard H Phelan IV}
 %   \date{2026-10-18}
@@ -36,12 +36,20 @@
 % Notes can't go inside boxes (tables, question/answer, figures): LaTeX
 % only places margin notes from running text.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{phelanbook}[2026/10/18 v0.1 Phelan house style, Tufte-style layout]
+\ProvidesClass{phelanlab}[2026/10/18 v1.0 Phelan lab report style, Tufte-style layout]
 
 % ---------- Options ----------
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 \LoadClass[11pt,letterpaper]{article}
+
+% ---------- Engine ----------
+\RequirePackage{iftex}
+\ifPDFTeX
+  \ClassError{phelanlab}{This class needs LuaLaTeX}{%
+    It uses the Minion Pro and Myriad Pro system fonts, which pdfLaTeX
+    cannot load.\MessageBreak Build with: latexmk -lualatex yourfile.tex}
+\fi
 
 % ---------- Page ----------
 \RequirePackage[
@@ -57,14 +65,38 @@
 \newlength{\sectionneedspace}
 \setlength{\sectionneedspace}{0.25\textheight}
 
-% ---------- Shared house style ----------
-\RequirePackage{phelanstyle}
-% Cover and chart ink: the house data blue.
-\definecolor{labInk}{HTML}{1C5CAB}
-\definecolor{labMuted}{HTML}{52514E}
+% ---------- Colours ----------
+\RequirePackage[table]{xcolor}
+\definecolor{labRule}{HTML}{9AA3AD}       % table top/bottom rules, question rule
+\definecolor{labRowRule}{HTML}{C6CCD3}    % rules between table rows
+\definecolor{labBand}{HTML}{E8EBEF}       % table header row, question band
+\definecolor{labPendingBg}{HTML}{FDF4E6}  % unfilled table cells
+\definecolor{labPendingFg}{HTML}{8A6D3B}
+\definecolor{labEqNumber}{HTML}{7A828C}   % equation numbers
+\definecolor{labInk}{HTML}{1C5CAB}        % cover and chart ink, the house data blue
+\definecolor{labMuted}{HTML}{52514E}      % cover author and subtitle
 
-% Body: 11 pt on a 15 pt line. Smaller than phelanlab's 12 pt to suit the
-% 4.75 in column (about 70 characters a line).
+% ---------- Fonts ----------
+% Body: Minion Pro. Headings, table headings, questions: Myriad Pro.
+% Maths: STIX Two Math for symbols, with Minion letters and digits so
+% equations match the text.
+\RequirePackage{amsmath}
+\RequirePackage{unicode-math}
+\setmainfont{Minion Pro}
+% By file name: by family name, Myriad Pro "Bold" resolves to Semibold.
+\setsansfont{MYRIADPRO}[
+  Extension = .OTF,
+  UprightFont = *-REGULAR,
+  BoldFont = *-BOLD,
+  BoldItalicFont = *-BOLDIT]
+\setmathfont{STIX Two Math}
+\setmathfont{Minion Pro}[range={up/{Latin,latin,num}}]
+\setmathfont{MinionPro-It.otf}[range={it/{Latin,latin}}]
+\setmathrm{Minion Pro}
+\RequirePackage{microtype}
+
+% Body: 11 pt on a 15 pt line, to suit the 4.75 in column (about 70
+% characters a line).
 \renewcommand\normalsize{%
   \@setfontsize\normalsize{11}{15}%
   \abovedisplayskip 6\p@ \@plus3\p@ \@minus3\p@
@@ -73,6 +105,89 @@
   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
   \let\@listi\@listI}
 \normalsize
+
+% \labfontsize{10}: that size on 1.2 line spacing.
+\newcommand\labfontsize[1]{\fontsize{#1}{1.2\dimexpr#1pt\relax}\selectfont}
+
+% ---------- Equation numbers ----------
+% Numbers beside equations are 10 pt and grey; \eqref in the text stays
+% body size and black.
+\def\tagform@#1{\maketag@@@{\color{labEqNumber}\labfontsize{10}%
+  (\ignorespaces#1\unskip\@@italiccorr)}}
+\renewcommand{\eqref}[1]{\textup{(\ref{#1})}}
+
+% ---------- Units ----------
+% \qty{10.01}{\volt} -> "10.01 V" with a non-breaking space;
+% \qtyrange{0.7}{2.7}{\percent} -> "0.7–2.7 %".
+\RequirePackage{siunitx}
+\sisetup{
+  per-mode = symbol,
+  number-unit-product = \nobreakspace,
+  range-phrase = \textendash,
+  range-units = single,
+  list-units = single,
+  retain-explicit-plus = true,
+}
+
+\RequirePackage{graphicx}
+
+% ---------- Tables ----------
+% \begin{labtable}{X[2]X[1]X[1]}   header row & ... \\  rows ... \end{labtable}
+% Full line width; 9 pt Minion; header row Myriad bold on a grey band,
+% bottom-aligned; bold first column; grey rules top and bottom, light rules
+% between rows, no vertical rules. Column widths are X[weight], so the Word
+% widths in dxa can be reused as weights: X[1500]X[2150]...
+\RequirePackage{tabularray}
+\NewTblrEnviron{labtblr}
+\SetTblrInner[labtblr]{
+  width = \linewidth,
+  rowsep = 2.5pt, colsep = 5pt,
+  cells = {valign = m},
+  column{1} = {font = \bfseries},
+  row{1} = {font = \sffamily\bfseries, bg = labBand, valign = f},
+  hline{1,Z} = {0.75pt, labRule},
+  hline{2-Y} = {0.25pt, labRowRule},
+}
+\SetTblrOuter[labtblr]{expand = \pending}
+% The 9 pt size is set outside the table so row heights follow it too.
+\NewDocumentEnvironment{labtable}{m +b}
+  {\fontsize{9}{11}\selectfont\begin{labtblr}{#1}#2\end{labtblr}}{}
+% A cell that is still waiting for a value.
+\newcommand{\pending}{\SetCell{bg=labPendingBg, fg=labPendingFg}\textemdash}
+
+% ---------- Questions and answers ----------
+% \begin{question} restated handout question \end{question}   -> "Q1  ..."
+% \begin{question}[Q3b] ... \end{question}                     -> custom label
+% \begin{answer} ... \end{answer}   body text indented 0.25 in, kept on one page;
+%   16 pt after it, a little more than a paragraph break, so each question
+%   and answer reads as one block
+\RequirePackage[most]{tcolorbox}
+\newcounter{question}
+\NewTColorBox{question}{o}{%
+  enhanced, unbreakable,
+  colback = labBand, colframe = labRule,
+  boxrule = 0pt, leftrule = 3pt, sharp corners,
+  left = 8pt, right = 6pt, top = 4pt, bottom = 4pt, boxsep = 0pt,
+  before skip = 12pt, after skip = 6pt,
+  fontupper = \sffamily\fontsize{10}{13.2}\selectfont,
+  halign = flush left,
+  before upper = {%
+    \IfNoValueTF{#1}%
+      {\refstepcounter{question}\textbf{Q\thequestion}}%
+      {\textbf{#1}}%
+    \hspace{0.75em}}}
+\NewTColorBox{answer}{}{%
+  blank, unbreakable, parbox = false,
+  left skip = 0.25in,
+  before skip = 0pt, after skip = 16pt,
+  halign = flush left}
+
+% ---------- Quantities ----------
+% \newquantity{\Vth}{V}{TH}: in text, an upright V with a real subscript
+% (house style); in maths, italic V with an upright subscript.
+\NewDocumentCommand\newquantity{mmm}{%
+  \NewDocumentCommand#1{}{\TextOrMath{#2\textsubscript{#3}}{#2_{\mathrm{#3}}}}%
+  \pdfstringdefDisableCommands{\def#1{#2#3}}}
 
 % ---------- Paragraphs ----------
 % Left-aligned, no indent, 6 pt between paragraphs, no hyphenation.
