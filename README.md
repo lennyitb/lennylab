@@ -5,11 +5,8 @@ My own LaTeX style for lab reports. The page layout is inspired by the Tufte-sty
 The sample below is a real report of mine, an RC transient lab. Its source and PDF are in [`showcase/`](showcase/).
 
 [![Cover: author, title and a full-page plot of four RC charging and discharging curves](showcase/pages/page-1.png)](showcase/phelan-lab06.pdf)
-
 [![Page 2: four circuit diagrams across the full width, equations, and a side note and table in the margin](showcase/pages/page-2.png)](showcase/phelan-lab06.pdf)
-
 [![Page 3: a full-width table, then text with a side note and a screenshot in the margin](showcase/pages/page-3.png)](showcase/phelan-lab06.pdf)
-
 [![Page 5: two plots with captions in the margin, and a close-up plot in the margin](showcase/pages/page-5.png)](showcase/phelan-lab06.pdf)
 
 ## Inside
