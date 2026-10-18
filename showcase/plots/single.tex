@@ -1,0 +1,32 @@
+% Figure 3: Circuit 1 charging, vC on the left axis and iC on the right,
+% as in handout step 10. Lines are the formulas, marks the Multisim export
+% (data/single-*.dat; t = 0 current set to 15 µA, the export writes 0).
+% At 1τ = 47 s: 15(1 - e^-1) = 9.48 V and 15 e^-1 = 5.52 µA; the export,
+% interpolated, reads 9.502 V and 5.498 µA.
+\hspace*{\chartgutter}\begin{tikzpicture}[trim axis left]
+  \begin{axis}[labplot, width=268pt, height=126pt,
+      xmin=0, xmax=1000, ymin=0, ymax=16,
+      xtick={0,200,...,1000}, ytick={0,4,...,16},
+      xlabel={Time (s)}, yticklabel style={text width=14pt, align=right},
+      ylabel={V}, ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=2pt},
+      axis y line*=left]
+    \addplot[theory=traceInk, domain=0:1000] {15*(1-exp(-x/47))};
+    \addplot[export=traceInk, mark=*] table[x=t, y=y] {data/single-v.dat};
+    \draw[level] (axis cs:47,0) -- (axis cs:47,16);
+    \node[tag, text=chartText, anchor=south west] at (axis cs:47,14.6) {1$\tau$ = \qty{47}{\second}};
+    \fill[traceInk] (axis cs:47,9.48) circle[radius=1.8pt];
+    \node[note, anchor=west, text=traceInk] at (axis cs:60,9.6) {\qty{9.48}{\volt}};
+    \node[tag, text=traceInk, anchor=north east] at (axis cs:990,14.4) {\(v_C\), left axis};
+  \end{axis}
+  \begin{axis}[labplot, width=268pt, height=126pt,
+      xmin=0, xmax=1000, ymin=0, ymax=16,
+      ytick={0,4,...,16}, grid=none,
+      axis x line=none, axis y line*=right,
+      ylabel={\unit{\micro\ampere}}, ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=2pt}]
+    \addplot[theory=accent, domain=0:1000] {15*exp(-x/47)};
+    \addplot[export=accent, mark=square*] table[x=t, y=y] {data/single-i.dat};
+    \fill[accent] (axis cs:47,5.52) circle[radius=1.8pt];
+    \node[note, anchor=west, text=accent] at (axis cs:60,5.3) {\qty{5.52}{\micro\ampere}};
+    \node[tag, text=accent, anchor=north east] at (axis cs:990,1.8) {\(i_C\), right axis};
+  \end{axis}
+\end{tikzpicture}

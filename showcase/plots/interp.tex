@@ -1,0 +1,23 @@
+% Margin figure: why Circuit 4 reads low at 1τ.
+% Export points either side of τ = 31.97 s (data/charge-v-32.dat):
+%   25.6 s -> 8.306 V,  45.6 s -> 11.496 V
+% Straight line at 31.97 s: 8.306 + (11.496 - 8.306)(6.37/20) = 9.322 V
+% Formula: 15(1 - e^-1) = 9.482 V; gap 0.160 V (-1.7 % of 9.48 V)
+\begin{tikzpicture}
+  \begin{axis}[labplot, width=128pt, height=104pt,
+      xmin=20, xmax=50, ymin=7.5, ymax=12,
+      xtick={20,30,40,50}, xticklabels={20,30,40,50\,\unit{\second}},
+      ytick={8,9,10,11,12}, yticklabels={8,9,10,11,12\,\unit{\volt}}]
+    \addplot[theory=tauA, domain=20:50] {15*(1-exp(-x/31.97))};
+    \addplot[accent, line width=0.6pt, densely dashed] coordinates {(25.6,8.306) (45.6,11.496)};
+    \addplot[export=tauA, mark=*, mark size=1.8pt] coordinates {(25.6,8.306) (45.6,11.496)};
+    \draw[chartText, densely dotted, line width=0.4pt] (axis cs:31.97,7.5) -- (axis cs:31.97,12);
+    \draw[tauA, line width=0.7pt, fill=white] (axis cs:31.97,9.482) circle[radius=2pt];
+    \fill[accent] (axis cs:31.97,9.322) circle[radius=1.6pt];
+    \node[note, anchor=south east, text=tauA] at (axis cs:31.2,9.55) {formula\\\qty{9.48}{\volt}};
+    \node[note, anchor=north west, text=accent] at (axis cs:32.8,9.25) {straight line\\\qty{9.32}{\volt}};
+    \node[note, anchor=north, fill=white] at (axis cs:31.97,7.95) {1$\tau$};
+    \node[note, anchor=east, text=tauA] at (axis cs:44.6,11.62) {export};
+    \node[note, anchor=south east, text=tauA] at (axis cs:25.4,8.4) {export};
+  \end{axis}
+\end{tikzpicture}

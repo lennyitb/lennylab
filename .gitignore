@@ -11,3 +11,9 @@
 
 # Completed coursework stays local
 examples/
+
+# Trial builds of real reports on the new classes
+sandbox/
+
+# The showcase report ships its PDF
+!showcase/phelan-lab06.pdf

@@ -1,0 +1,38 @@
+% Figures 4, 5, 7 and 8: one quantity for all four circuits.
+%   \fourplot{file prefix}{formula of x and \tau}{ymin}{ymax}{yticks}{yticklabels}
+%            {level}{legend style}{y unit}
+% Lines are the formula for each τ, marks the Multisim export, so the
+% straight-line sag between Circuit 4's sparse points isn't drawn in. Each
+% curve crosses the dashed level at its own τ; a dotted drop line shows
+% where that τ falls on the time axis.
+\newcommand{\fourplot}[9]{%
+  \hspace*{\chartgutter}\begin{tikzpicture}[trim axis left]
+    \begin{axis}[labplot, width=280pt, height=116pt,
+        xmin=0, xmax=1000, ymin=#3, ymax=#4,
+        xtick={0,200,...,1000}, ytick={#5}, yticklabels={#6},
+        xlabel={Time (s)}, yticklabel style={text width=14pt, align=right},
+        ylabel={#9}, ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=2pt},
+        legend style={#8}, legend columns=1]
+      \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
+        \edef\temp{\noexpand\addplot[theory=\c, domain=0:1000, forget plot]
+          {#2};}\temp
+      }
+      \addplot[export=tauA, mark=*, forget plot]         table[x=t, y=y] {data/#1-32.dat};
+      \addplot[export=tauB, mark=square*, forget plot]   table[x=t, y=y] {data/#1-47.dat};
+      \addplot[export=tauC, mark=triangle*, forget plot] table[x=t, y=y] {data/#1-100.dat};
+      \addplot[export=tauD, mark=diamond*, forget plot]  table[x=t, y=y] {data/#1-147.dat};
+      % Legend samples: the line and the mark together
+      \addlegendimage{tauA, line width=0.55pt, mark=*, mark size=1.5pt, mark options={fill=tauA, draw=white, line width=0.25pt}}
+      \addlegendimage{tauB, line width=0.55pt, mark=square*, mark size=1.5pt, mark options={fill=tauB, draw=white, line width=0.25pt}}
+      \addlegendimage{tauC, line width=0.55pt, mark=triangle*, mark size=1.5pt, mark options={fill=tauC, draw=white, line width=0.25pt}}
+      \addlegendimage{tauD, line width=0.55pt, mark=diamond*, mark size=1.5pt, mark options={fill=tauD, draw=white, line width=0.25pt}}
+      \legend{\(\tau\) = \qty{32}{\second} · Circuit 4, \(\tau\) = \qty{47}{\second} · Circuit 1,
+              \(\tau\) = \qty{100}{\second} · Circuit 2, \(\tau\) = \qty{147}{\second} · Circuit 3}
+      \draw[level] (axis cs:0,#7) -- (axis cs:1000,#7);
+      \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
+        \edef\temp{\noexpand\draw[\c, densely dotted, line width=0.5pt]
+            (axis cs:\tau,#7) -- (axis cs:\tau,#3);
+          \noexpand\draw[\c, line width=0.7pt, fill=white] (axis cs:\tau,#7) circle[radius=2pt];}\temp
+      }
+    \end{axis}
+  \end{tikzpicture}}

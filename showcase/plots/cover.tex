@@ -1,0 +1,40 @@
+% Cover art: all eight transients on one set of axes. Charging curves rise
+% toward 15 V and discharge curves fall toward 0 V; each pair crosses at
+% 7.5 V, at τ ln 2. The rings sit at 1τ (9.48 V rising, 5.52 V falling).
+% Marks are the Multisim exports. 7.25 in wide, about 5.4 in tall.
+\begin{tikzpicture}
+  \begin{axis}[labplot, width=7.25in, height=5.0in,
+      xmin=0, xmax=600, ymin=0, ymax=15.6,
+      axis lines=none, grid=none, clip=false]
+    \draw[labRule, line width=0.4pt] (axis cs:0,0) -- (axis cs:600,0);
+    \draw[labRowRule, line width=0.4pt, dashed] (axis cs:0,15) -- (axis cs:600,15);
+    \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
+      \edef\temp{%
+        \noexpand\addplot[\c, line width=1.1pt, samples=200, smooth, domain=0:600] {15*(1-exp(-x/\tau))};
+        \noexpand\addplot[\c, line width=1.1pt, samples=200, smooth, domain=0:600, opacity=0.45] {15*exp(-x/\tau)};
+        \noexpand\draw[\c, line width=0.9pt, fill=white] (axis cs:\tau,9.482) circle[radius=2.6pt];
+        \noexpand\draw[\c, line width=0.9pt, fill=white, opacity=0.6] (axis cs:\tau,5.518) circle[radius=2.6pt];
+      }\temp
+    }
+    \addplot[export=tauA, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-32.dat};
+    \addplot[export=tauB, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-47.dat};
+    \addplot[export=tauC, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-100.dat};
+    \addplot[export=tauD, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-147.dat};
+    % Time constants, read off along the top
+    \foreach \tau/\c/\lab/\side in {31.97/tauA/32/south east, 47/tauB/47/south west,
+                                    100/tauC/100/south, 147/tauD/147/south} {
+      \edef\temp{\noexpand\draw[\c, line width=0.4pt, densely dotted]
+          (axis cs:\tau,9.482) -- (axis cs:\tau,16.6);
+        \noexpand\node[tag, text=\c, anchor=\side, inner sep=1pt] at (axis cs:\tau,16.6)
+          {\noexpand\qty{\lab}{\noexpand\second}};}\temp
+    }
+    \node[note, anchor=south west, inner sep=0pt] at (axis cs:0,17.6)
+      {\textcolor{chartText}{Time constant \(\tau = RC\), \(R = \qty{1}{\mega\ohm}\)}};
+    \node[note, anchor=north east] at (axis cs:600,14.6)
+      {\fontsize{9}{11}\selectfont\(v_C = \qty{15}{\volt}\,(1 - e^{-t/\tau})\)};
+    \node[note, anchor=south east] at (axis cs:600,0.5)
+      {\fontsize{9}{11}\selectfont\(v_C = \qty{15}{\volt}\,e^{-t/\tau}\)};
+    \node[note, anchor=north west] at (axis cs:0,-0.4) {0 s};
+    \node[note, anchor=north east] at (axis cs:600,-0.4) {600 s};
+  \end{axis}
+\end{tikzpicture}

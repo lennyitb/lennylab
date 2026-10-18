@@ -1,0 +1,50 @@
+% Chart styles for Lab 06: the house chart preamble plus one colour and one
+% mark per circuit. The circuits are ordered by time constant, so their
+% colours run light to dark with τ: 32 s, 47 s, 100 s, 147 s.
+\usepackage{pgfplots}
+\pgfplotsset{compat=1.18}
+\usetikzlibrary{patterns, arrows.meta}
+\usepackage[american]{circuitikz}
+
+\definecolor{traceInk}{HTML}{1C5CAB}    % measured data
+\definecolor{accent}{HTML}{EB6834}      % what the reader should notice
+\definecolor{chartText}{HTML}{52514E}   % labels and annotations
+\definecolor{tauA}{HTML}{6E9FDB}        % Circuit 4, τ = 32 s
+\definecolor{tauB}{HTML}{3A78C4}        % Circuit 1, τ = 47 s
+\definecolor{tauC}{HTML}{1C5CAB}        % Circuit 2, τ = 100 s
+\definecolor{tauD}{HTML}{0B2E5C}        % Circuit 3, τ = 147 s
+
+% Text-column charts put their y axis exactly \chartgutter in from the text
+% edge: the picture is trimmed to the axis (trim axis left) and shifted by
+% the gutter, so tick and unit labels of different widths can't move it.
+\newlength{\chartgutter}\setlength{\chartgutter}{29pt}
+\pgfplotsset{
+  labplot/.style={
+    scale only axis,
+    axis line style={labRule, line width=0.5pt},
+    tick style={labRule, line width=0.5pt},
+    major tick length=2.5pt,
+    tick align=outside,
+    grid=major, grid style={labRowRule!55, line width=0.3pt},
+    tick label style={font=\sffamily\fontsize{7.5}{9}\selectfont, text=chartText},
+    label style={font=\sffamily\fontsize{8}{9.5}\selectfont, text=chartText},
+    /pgf/number format/assume math mode=true,
+    clip mode=individual,
+  },
+  % Formula as a thin line, the Multisim export as marks on it.
+  theory/.style={#1, line width=0.55pt, samples=160, smooth, mark=none},
+  export/.style={#1, only marks, mark size=1.3pt, mark options={fill=#1, draw=white, line width=0.25pt}},
+  legend style={draw=none, fill=white, fill opacity=0.9, text opacity=1,
+    font=\sffamily\fontsize{7.5}{9}\selectfont, text=chartText,
+    inner sep=2pt, row sep=-1pt},
+  legend cell align=left,
+}
+\tikzset{
+  note/.style={font=\sffamily\fontsize{7.5}{9}\selectfont, text=chartText,
+               inner sep=1.5pt, align=left},
+  tag/.style={font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, inner sep=1.5pt},
+  dim/.style={{Stealth[length=3pt]}-{Stealth[length=3pt]}, chartText, line width=0.4pt},
+  level/.style={chartText, dashed, line width=0.45pt},
+  every picture/.append style={execute at begin picture={%
+    \sisetup{mode=text, reset-text-family=false, reset-text-series=false}}},
+}
