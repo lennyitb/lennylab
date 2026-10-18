@@ -65,7 +65,7 @@
 \newlength{\sectionneedspace}
 \setlength{\sectionneedspace}{0.25\textheight}
 
-% ---------- Colours ----------
+% ---------- Colors ----------
 \RequirePackage[table]{xcolor}
 \definecolor{labRule}{HTML}{9AA3AD}       % table top/bottom rules, question rule
 \definecolor{labRowRule}{HTML}{C6CCD3}    % rules between table rows
@@ -78,7 +78,7 @@
 
 % ---------- Fonts ----------
 % Body: Minion Pro. Headings, table headings, questions: Myriad Pro.
-% Maths: STIX Two Math for symbols, with Minion letters and digits so
+% Math: STIX Two Math for symbols, with Minion letters and digits so
 % equations match the text.
 \RequirePackage{amsmath}
 \RequirePackage{unicode-math}
@@ -110,7 +110,7 @@
 \newcommand\labfontsize[1]{\fontsize{#1}{1.2\dimexpr#1pt\relax}\selectfont}
 
 % ---------- Equation numbers ----------
-% Numbers beside equations are 10 pt and grey; \eqref in the text stays
+% Numbers beside equations are 10 pt and gray; \eqref in the text stays
 % body size and black.
 \def\tagform@#1{\maketag@@@{\color{labEqNumber}\labfontsize{10}%
   (\ignorespaces#1\unskip\@@italiccorr)}}
@@ -133,8 +133,8 @@
 
 % ---------- Tables ----------
 % \begin{labtable}{X[2]X[1]X[1]}   header row & ... \\  rows ... \end{labtable}
-% Full line width; 9 pt Minion; header row Myriad bold on a grey band,
-% bottom-aligned; bold first column; grey rules top and bottom, light rules
+% Full line width; 9 pt Minion; header row Myriad bold on a gray band,
+% bottom-aligned; bold first column; gray rules top and bottom, light rules
 % between rows, no vertical rules. Column widths are X[weight], so the Word
 % widths in dxa can be reused as weights: X[1500]X[2150]...
 \RequirePackage{tabularray}
@@ -184,7 +184,7 @@
 
 % ---------- Quantities ----------
 % \newquantity{\Vth}{V}{TH}: in text, an upright V with a real subscript
-% (house style); in maths, italic V with an upright subscript.
+% (house style); in math, italic V with an upright subscript.
 \NewDocumentCommand\newquantity{mmm}{%
   \NewDocumentCommand#1{}{\TextOrMath{#2\textsubscript{#3}}{#2_{\mathrm{#3}}}}%
   \pdfstringdefDisableCommands{\def#1{#2#3}}}
@@ -198,7 +198,7 @@
 
 % ---------- Headings ----------
 % Myriad Pro Bold. Sections are unnumbered on the page; subsections show
-% "1.1" in grey.
+% "1.1" in gray.
 \RequirePackage{titlesec}
 \RequirePackage{needspace}
 \titleformat{\section}{\sffamily\bfseries\labfontsize{15}\RaggedRight}{}{0pt}{}
@@ -285,7 +285,7 @@
   {\marginpar{\marginfont\kern\dimexpr#1-0.65em\relax
      \captionsetup{type=table}\@margincaptions#2}}{}
 % marginlabtable: the labtable look sized for the margin, for use inside
-% margintable. 8 pt; header row Myriad bold on the grey band; grey rules top
+% margintable. 8 pt; header row Myriad bold on the gray band; gray rules top
 % and bottom, light rules between rows. \begin{marginlabtable}{X[l]X[r]X[r]}
 \NewTblrEnviron{marginlabtblr}
 \SetTblrInner[marginlabtblr]{
@@ -353,7 +353,7 @@
        \ifx\@subtitle\@empty\else
          \vspace{10pt}{\rmfamily\mdseries\itshape\fontsize{17}{21}\selectfont
          \color{labMuted}\@subtitle\par}\fi};
-    % Cover art, or the lab number in the house grey band colour
+    % Cover art, or the lab number in the house gray band color
     \ifx\@coverart\@empty
       \node[anchor=south east, inner sep=0pt, text=labBand] at (7.875, 9.3)
         {\sffamily\bfseries\fontsize{300}{300}\selectfont\@labnumber};
@@ -380,7 +380,7 @@
 % ---------- Footer ----------
 % Across the full width: \footertext on the left (default: course, lab
 % number and title), page number on the right, 10 pt. No running head.
-% Parts of the footer are separated by a centred dot: \@footsep.
+% Parts of the footer are separated by a centered dot: \@footsep.
 \def\@footsep{\enspace\textperiodcentered\enspace}
 \def\@footertext{\@course\@footsep Lab~\@labnumber\@footsep\@title}
 \newcommand\footertext[1]{\def\@footertext{#1}}

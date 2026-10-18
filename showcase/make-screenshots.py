@@ -5,7 +5,7 @@ Renders the cover and pages 2, 3 and 5 with pdftoppm and draws a hairline
 border inside each edge, so the white pages show their edges on a white
 background. GitHub shows README images 838 CSS px wide on desktop; at twice
 that, a 2 px border lands on whole screen pixels on a 2x display and matches
-the 1 px frame around the README in GitHub's border grey.
+the 1 px frame around the README in GitHub's border gray.
 
 Run it with python3 -I make-screenshots.py after building the PDF; it needs
 pdftoppm (poppler) and Pillow.

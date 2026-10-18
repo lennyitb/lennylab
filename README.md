@@ -1,6 +1,6 @@
 # phelanlab
 
-My own LaTeX style for lab reports. The page layout is inspired by the Tufte-style book: a narrow text column with a wide margin beside it for notes, small tables and figures, plus a full cover page and blocks that run across both columns. The type, tables, units and colours are my own house style: Minion Pro for the text and Myriad Pro for the headings.
+My own LaTeX style for lab reports. The page layout is inspired by the Tufte-style book: a narrow text column with a wide margin beside it for notes, small tables and figures, plus a full cover page and blocks that run across both columns. The type, tables, units and colors are my own house style: Minion Pro for the text and Myriad Pro for the headings.
 
 The sample below is a real report of mine, an RC transient lab. Its source and PDF are in [`showcase/`](showcase/).
 
