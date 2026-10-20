@@ -159,8 +159,11 @@
 % \begin{question} restated handout question \end{question}   -> "Q1  ..."
 % \begin{question}[Q3b] ... \end{question}                     -> custom label
 % \begin{answer} ... \end{answer}   body text indented 0.25 in, kept on one page;
-%   16 pt after it, a little more than a paragraph break, so each question
-%   and answer reads as one block
+%   8 pt between the question band and its answer, and 16 pt after the
+%   answer, a little more than a paragraph break, so each question and
+%   answer reads as one block. tcolorbox takes \parskip off every skip, so
+%   the answer's before skip must match the question's after skip; at 0 pt
+%   the two cancel and the answer touches the band.
 \RequirePackage[most]{tcolorbox}
 \newcounter{question}
 \NewTColorBox{question}{o}{%
@@ -168,7 +171,7 @@
   colback = labBand, colframe = labRule,
   boxrule = 0pt, leftrule = 3pt, sharp corners,
   left = 8pt, right = 6pt, top = 4pt, bottom = 4pt, boxsep = 0pt,
-  before skip = 12pt, after skip = 6pt,
+  before skip = 12pt, after skip = 8pt,
   fontupper = \sffamily\fontsize{10}{13.2}\selectfont,
   halign = flush left,
   before upper = {%
@@ -179,7 +182,7 @@
 \NewTColorBox{answer}{}{%
   blank, unbreakable, parbox = false,
   left skip = 0.25in,
-  before skip = 0pt, after skip = 16pt,
+  before skip = 8pt, after skip = 16pt,
   halign = flush left}
 
 % ---------- Quantities ----------
