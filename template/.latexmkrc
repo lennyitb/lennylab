@@ -1,4 +1,4 @@
-# Build with LuaLaTeX (phelanlab.cls needs it for Minion Pro / Myriad Pro)
+# Build with LuaLaTeX (lennylab.cls needs it for Minion Pro / Myriad Pro)
 $pdf_mode = 4;
 
 # After the build, copy the PDF to the submission filename

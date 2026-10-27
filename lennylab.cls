@@ -1,4 +1,4 @@
-% phelanlab.cls -- Lenny Phelan's lab report style on a Tufte-style page
+% lennylab.cls -- Lenny Phelan's lab report style on a Tufte-style page
 %
 % A narrow text column with a wide note margin on the right, a full cover
 % page, and blocks that can span both. Minion Pro text, Myriad Pro headings,
@@ -10,7 +10,7 @@
 %   Full width (text + gap + margin) is 7.25 in: \fulltextwidth.
 %
 % Usage:
-%   \documentclass{phelanlab}   % [offwhitecover]: cover on off-white paper
+%   \documentclass{lennylab}   % [offwhitecover]: cover on off-white paper
 %   \title{RC Transient Response}
 %   \author{Leonard H Phelan IV}
 %   \date{2026-10-18}
@@ -43,7 +43,7 @@
 % Notes can't go inside boxes (tables, question/answer, figures): LaTeX
 % only places margin notes from running text.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{phelanlab}[2026/10/26 v1.2 Phelan lab report style, Tufte-style layout]
+\ProvidesClass{lennylab}[2026/10/26 v1.2 Phelan lab report style, Tufte-style layout]
 
 % ---------- Options ----------
 % offwhitecover: print the cover on warm off-white paper (labCoverPaper)
@@ -57,7 +57,7 @@
 % ---------- Engine ----------
 \RequirePackage{iftex}
 \ifPDFTeX
-  \ClassError{phelanlab}{This class needs LuaLaTeX}{%
+  \ClassError{lennylab}{This class needs LuaLaTeX}{%
     It uses the Minion Pro and Myriad Pro system fonts, which pdfLaTeX
     cannot load.\MessageBreak Build with: latexmk -lualatex yourfile.tex}
 \fi
@@ -544,7 +544,7 @@
 %                              mostly repeat their section's page
 \newcommand\contentssubpages[1]{%
   \@ifundefined{@tocsubpage@#1}
-    {\ClassError{phelanlab}{Unknown \string\contentssubpages{#1}}
+    {\ClassError{lennylab}{Unknown \string\contentssubpages{#1}}
        {Use inline, right or none.}}
     {\def\@tocsubpages{#1}}}
 \newcommand\@tocsubpagefont{\labfontsize{9}\color{labAccent}}
