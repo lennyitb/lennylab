@@ -1,0 +1,100 @@
+% Results margin figure: each circuit's charging and discharging tau from
+% the scope fits on one axis, so the gap between them reads as a length.
+% Charging sits just below its row's bar and discharging just above it, both
+% pointing at it; where the two agree they meet tip to tip. Each row's tags
+% give the gap in seconds (on the head line) and percent (one line under it),
+% set as a single two-line block per row, all on one decimal column.
+%
+% Data: data/scope-values.tex (fitted tau over the nominal R*C), written by
+% make-scope-data.py. x is (tau / R*C - 1) in percent:
+%   Circuit 1  0.9566 -> -4.3 %   1.0592 -> +5.9 %   1.0592/0.9566 = 1.107
+%   Circuit 2  0.9633 -> -3.7 %   0.9679 -> -3.2 %   0.9679/0.9633 = 1.005
+%   Circuit 3  0.9783 -> -2.2 %   0.9784 -> -2.2 %   0.9784/0.9783 = 1.000
+%   Circuit 4  0.9984 -> -0.2 %   1.0334 -> +3.3 %   1.0334/0.9984 = 1.035
+% The seconds are the same ratios times R*C (45.0/49.8, 96.3/96.8,
+% 143.8/143.8, 31.9/33.0 s), as in the Part 4 tables, and the gaps
+% 49.78 - 44.96 = 4.82, 96.79 - 96.33 = 0.46, 143.82 - 143.81 = 0.01 and
+% 33.04 - 31.92 = 1.12 s. Adjusted tau:
+% (R || R_VM)/R = 9.598/10.598 = 0.9056, so -9.4 %.
+\input{data/scope-values}
+\newcommand{\prtau}[2]{\csname scope-#1#2-tau\endcsname}   % c|d, circuit
+\newcommand{\prx}[2]{{(\prtau{#1}{#2}-1)*100}}
+% The marks as text, for the legend and row heads
+\newcommand{\chgmark}{\tikz[baseline=0pt]\fill[traceInk]
+  (0,0) -- (5pt,0) -- (2.5pt,4.5pt) -- cycle;}
+\newcommand{\dismark}{\tikz[baseline=0pt]\fill[traceInk]
+  (0,4.5pt) -- (5pt,4.5pt) -- (2.5pt,0) -- cycle;}
+% Fitted tau in seconds: ratio times R*C
+\newcommand{\prsec}[3]{\pgfmathparse{\prtau{#1}{#2}*#3}%
+  \pgfmathprintnumber[fixed, fixed zerofill, precision=1,
+    assume math mode=true]{\pgfmathresult}\,\unit{\second}}
+% How much longer the discharge took than the charge, signed, to one
+% decimal; under 0.05 prints as "< 0.1". Set as two nodes split at the
+% decimal point, which sits \prdecx left of the row's right edge, so every
+% tag lines up on it. \prdelta{expression}{unit}{y shift}{circuit}
+\newlength{\prdecx}
+\newcommand{\prdelta}[4]{\pgfmathsetmacro{\prval}{#1}%
+  \pgfmathtruncatemacro{\prtenths}{round(\prval*10)}%
+  \ifnum\prtenths<1 \def\prwhole{<\,0}\def\prfrac{1}%
+  \else
+    \pgfmathtruncatemacro{\prwhole}{\prtenths/10}%
+    \pgfmathtruncatemacro{\prfrac}{\prtenths-10*\prwhole}%
+    \edef\prwhole{+\prwhole}%
+  \fi
+  \node[prtag, inner sep=0pt, anchor=base east]
+    at ([xshift=\prdecx, yshift=#3]prowr#4) {\prwhole};
+  \node[prtag, inner sep=0pt, anchor=base west]
+    at ([xshift=\prdecx, yshift=#3]prowr#4) {.\prfrac\,\unit{#2}};}
+\newcommand{\prgap}[2]{\prdelta{(\prtau{d}{#1}/\prtau{c}{#1}-1)*100}{\percent}{#2}{#1}}
+\newcommand{\prdiff}[3]{\prdelta{(\prtau{d}{#1}-\prtau{c}{#1})*#2}{\second}{#3}{#1}}
+% One row: the gap bar on the line, and its ends saved for the marks,
+% which are drawn after the axis (pt offsets inside it go astray).
+\newcommand{\pairrow}[2]{% circuit, row y
+  \draw[accent, line width=1.6pt] (axis cs:\prx{c}{#1},#2) -- (axis cs:\prx{d}{#1},#2);
+  \coordinate (prc#1) at (axis cs:\prx{c}{#1},#2);
+  \coordinate (prd#1) at (axis cs:\prx{d}{#1},#2);
+  \coordinate (prow#1) at (axis cs:-12,#2);
+  \coordinate (prowr#1) at (axis cs:12,#2);}
+\tikzset{
+  prhead/.style={note, anchor=base west, fill=white, inner sep=1pt},
+  prtag/.style={tag, text=chartText, anchor=base east, fill=white, inner sep=1pt},
+}
+
+% Decimal column: the widest fraction (".0 %") ends 1 pt in from the edge.
+% Measured outside the picture (TikZ sets \nullfont inside one), with the
+% chart's siunitx settings so the unit is in its Myriad.
+\settowidth{\prdecx}{\sisetup{mode=text, reset-text-family=false,
+  reset-text-series=false}\sffamily\bfseries\fontsize{7.5}{9}\selectfont
+  .0\,\unit{\percent}}
+\setlength{\prdecx}{\dimexpr-\prdecx-1pt\relax}
+
+\begin{tikzpicture}
+  \begin{axis}[labplot, name=pairs, width=158pt, height=118pt,
+      xmin=-12, xmax=12, ymin=0.55, ymax=4.75,
+      axis x line*=bottom, axis y line=none, ytick=\empty, grid=none,
+      xtick={-10,-5,0,5,10}, xticklabels={−10,−5,0,+5,+10\,\%},
+      xlabel={Fitted \(\tau\) vs \(R \cdot C\)},
+      xlabel style={yshift=2pt}]
+    \draw[chartText, line width=0.5pt, dash pattern=on 2pt off 1.5pt]
+      (axis cs:-9.44,0.55) -- (axis cs:-9.44,4.75);
+    \draw[chartText, line width=0.5pt] (axis cs:0,0.55) -- (axis cs:0,4.75);
+    \node[note, anchor=base, yshift=3pt] at (axis cs:-9.44,4.75) {adjusted};
+    \node[note, anchor=base, yshift=3pt] at (axis cs:0,4.75) {\(R \cdot C\)};
+    \coordinate (prtop) at (axis cs:-12,4.75);
+    \pairrow{1}{4}
+    \pairrow{2}{3}
+    \pairrow{3}{2}
+    \pairrow{4}{1}
+  \end{axis}
+  \node[note, anchor=south west, inner sep=0pt] at ([yshift=14pt]prtop)
+    {\chgmark\ charging\qquad\dismark\ discharging};
+  \foreach \c/\rc in {1/47, 2/100, 3/147, 4/31.97} {
+    % Tips at the bar's edges (half its 1.6 pt width off the line)
+    \fill[traceInk] (prc\c) ++(0,-0.8pt) -- ++(2.5pt,-4.5pt) -- ++(-5pt,0) -- cycle;
+    \fill[traceInk] (prd\c) ++(0,0.8pt) -- ++(2.5pt,4.5pt) -- ++(-5pt,0) -- cycle;
+    \node[prhead] at ([yshift=10pt]prow\c)
+      {\textbf{Circuit \c}\enspace\chgmark\,\prsec{c}{\c}{\rc}\enspace\dismark\,\prsec{d}{\c}{\rc}};
+    \prdiff{\c}{\rc}{10pt}
+    \prgap{\c}{1.5pt}   % 8.5 pt leading
+  }
+\end{tikzpicture}

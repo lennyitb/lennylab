@@ -1,0 +1,14 @@
+% Margin figure: the 4.1 meter measurement (the handout's right-hand
+% picture), the DMM drawn as R_VM in a dashed box. Names follow the
+% handout: V8, R13, XMM4. Width fits the 2.25 in margin.
+\begin{circuitikz}[x=1cm, y=1cm, font=\footnotesize, scale=0.95, transform shape,
+    every label/.append style={font=\footnotesize}]
+  \ctikzset{bipoles/length=0.8cm, resistors/scale=0.75, sources/scale=1.1}
+  \draw (0,0) to[V, invert, l2^={V8 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
+        to[R, l={R13}, a={\qty{1}{\mega\ohm}}] (2.1,2.4)
+        to[R, l2^={\(R_{\mathrm{VM}}\) and \qty{9.6}{\mega\ohm}}, l2 valign=c] (2.1,0) -- (0,0)
+        node[circ] {} node[ground] {};
+  \draw[dashed, gray, line width=0.4pt] (1.65,0.35) rectangle (3.8,1.95);
+  \node[font=\sffamily\fontsize{7}{8.5}\selectfont, text=chartText, anchor=south east,
+        inner sep=1pt] at (3.8,1.97) {XMM4 (DMM)};
+\end{circuitikz}

@@ -10,7 +10,7 @@
 %   Full width (text + gap + margin) is 7.25 in: \fulltextwidth.
 %
 % Usage:
-%   \documentclass{phelanlab}
+%   \documentclass{phelanlab}   % [offwhitecover]: cover on off-white paper
 %   \title{RC Transient Response}
 %   \author{Leonard H Phelan IV}
 %   \date{2026-10-18}
@@ -18,8 +18,13 @@
 %   \course{ELT-1031}
 %   \instructor{prof. Ashworth}
 %   \footertext{Phelan · ELT-1031 · Lab 06}    % optional, bottom left
-%   \coverart{<tikzpicture or \includegraphics>} % optional, 7.25 x 4.6 in
-%   \begin{document}\maketitle ...
+%   \coverart{<tikzpicture or \includegraphics>} % optional, 6.75 x 4.6 in
+%   \contentssubpages{inline}  % subsection page numbers: inline, right, none
+%   \begin{document}\maketitle \tableofcontents ...   % contents optional
+%
+% Headings:
+%   \section{\headlabel{Part~1}Prelab Calculations}  lead in beige, no colon
+%   \section*{...}             listed in the contents too, without a number
 %
 % Margin material:
 %   \sidenote{text}            numbered note; the number goes in the text
@@ -33,12 +38,18 @@
 %   fullwidth environment       any text or table across text and margin
 %   figure* / table*            full-width figure or table, caption below
 %   \widefig{width}{file}{caption}{label}  width as a fraction of \fullwidth
+% Blocks:
+%   question / answer environments, definition{term}, quote
 % Notes can't go inside boxes (tables, question/answer, figures): LaTeX
 % only places margin notes from running text.
 \NeedsTeXFormat{LaTeX2e}
-\ProvidesClass{phelanlab}[2026/10/18 v1.0 Phelan lab report style, Tufte-style layout]
+\ProvidesClass{phelanlab}[2026/10/26 v1.2 Phelan lab report style, Tufte-style layout]
 
 % ---------- Options ----------
+% offwhitecover: print the cover on warm off-white paper (labCoverPaper)
+% instead of white. Pages after the cover stay white.
+\newif\if@offwhitecover
+\DeclareOption{offwhitecover}{\@offwhitecovertrue}
 \DeclareOption*{\PassOptionsToClass{\CurrentOption}{article}}
 \ProcessOptions\relax
 \LoadClass[11pt,letterpaper]{article}
@@ -67,14 +78,29 @@
 
 % ---------- Colors ----------
 \RequirePackage[table]{xcolor}
-\definecolor{labRule}{HTML}{9AA3AD}       % table top/bottom rules, question rule
-\definecolor{labRowRule}{HTML}{C6CCD3}    % rules between table rows
-\definecolor{labBand}{HTML}{E8EBEF}       % table header row, question band
-\definecolor{labPendingBg}{HTML}{FDF4E6}  % unfilled table cells
-\definecolor{labPendingFg}{HTML}{8A6D3B}
-\definecolor{labEqNumber}{HTML}{7A828C}   % equation numbers
+% The page furniture is beige: rules, bands, numbers, block rules and
+% caption labels. Charts keep gray axes and grids under their bright data.
+\definecolor{labRule}{HTML}{C8B796}       % table top/bottom rules
+\definecolor{labRowRule}{HTML}{E4DBC8}    % rules between table rows
+\definecolor{labBand}{HTML}{F3EDE1}       % table header row, question and definition bands
+\definecolor{labCoverBar}{HTML}{5B3A22}   % the bar down the cover's left edge, dark brown
+\definecolor{labAccent}{HTML}{9E8256}     % heading and equation numbers, block rules, caption labels
+\definecolor{labPendingBg}{HTML}{FBE3D3}  % unfilled table cells
+\definecolor{labPendingFg}{HTML}{A0522D}
 \definecolor{labInk}{HTML}{1C5CAB}        % cover and chart ink, the house data blue
-\definecolor{labMuted}{HTML}{52514E}      % cover author and subtitle
+\definecolor{labMuted}{HTML}{5C5347}      % cover author and subtitle, caption text
+\definecolor{labChartRule}{HTML}{9AA3AD}  % chart axes and ticks
+\definecolor{labChartGrid}{HTML}{C6CCD3}  % chart grid
+% The cover's paper: off-white in the band's hue, a step lighter than
+% labBand so the big lab number and faint cover art still show on it.
+% White unless the class option offwhitecover is given; cover art can fill
+% with labCoverPaper to match either way.
+\definecolor{labOffWhite}{HTML}{FAF7F0}
+\if@offwhitecover
+  \colorlet{labCoverPaper}{labOffWhite}
+\else
+  \colorlet{labCoverPaper}{white}
+\fi
 
 % ---------- Fonts ----------
 % Body: Minion Pro. Headings, table headings, questions: Myriad Pro.
@@ -105,14 +131,16 @@
   \belowdisplayshortskip 6\p@ \@plus3\p@ \@minus3\p@
   \let\@listi\@listI}
 \normalsize
+% Extra space between the lines of gather, align and the like (default 3 pt).
+\setlength\jot{6pt}
 
 % \labfontsize{10}: that size on 1.2 line spacing.
 \newcommand\labfontsize[1]{\fontsize{#1}{1.2\dimexpr#1pt\relax}\selectfont}
 
 % ---------- Equation numbers ----------
-% Numbers beside equations are 10 pt and gray; \eqref in the text stays
+% Numbers beside equations are 10 pt and beige; \eqref in the text stays
 % body size and black.
-\def\tagform@#1{\maketag@@@{\color{labEqNumber}\labfontsize{10}%
+\def\tagform@#1{\maketag@@@{\color{labAccent}\labfontsize{10}%
   (\ignorespaces#1\unskip\@@italiccorr)}}
 \renewcommand{\eqref}[1]{\textup{(\ref{#1})}}
 
@@ -133,8 +161,8 @@
 
 % ---------- Tables ----------
 % \begin{labtable}{X[2]X[1]X[1]}   header row & ... \\  rows ... \end{labtable}
-% Full line width; 9 pt Minion; header row Myriad bold on a gray band,
-% bottom-aligned; bold first column; gray rules top and bottom, light rules
+% Full line width; 9 pt Minion; header row Myriad bold on a beige band,
+% bottom-aligned; bold first column; tan rules top and bottom, light rules
 % between rows, no vertical rules. Column widths are X[weight], so the Word
 % widths in dxa can be reused as weights: X[1500]X[2150]...
 \RequirePackage{tabularray}
@@ -168,7 +196,7 @@
 \newcounter{question}
 \NewTColorBox{question}{o}{%
   enhanced, unbreakable,
-  colback = labBand, colframe = labRule,
+  colback = labBand, colframe = labAccent,
   boxrule = 0pt, leftrule = 3pt, sharp corners,
   left = 8pt, right = 6pt, top = 4pt, bottom = 4pt, boxsep = 0pt,
   before skip = 12pt, after skip = 8pt,
@@ -183,6 +211,26 @@
   blank, unbreakable, parbox = false,
   left skip = 0.25in,
   before skip = 8pt, after skip = 16pt,
+  halign = flush left}
+
+% ---------- Definitions and quotes ----------
+% \begin{definition}{Time constant} ... \end{definition}: the term in Myriad
+%   bold, then the definition in Minion, on the beige band with a beige rule.
+% \begin{quote} ... \end{quote}: Minion italic beside a thin beige rule.
+\NewTColorBox{definition}{m}{%
+  enhanced, unbreakable,
+  colback = labBand, colframe = labAccent,
+  boxrule = 0pt, leftrule = 3pt, sharp corners,
+  left = 8pt, right = 6pt, top = 5pt, bottom = 5pt, boxsep = 0pt,
+  before skip = 12pt, after skip = 12pt,
+  halign = flush left,
+  before upper = {{\sffamily\bfseries #1}\hspace{0.75em}}}
+\RenewTColorBox{quote}{}{%
+  blank, breakable, parbox = false,
+  borderline west = {1.5pt}{0pt}{labAccent},
+  left = 12pt,
+  before skip = 10pt, after skip = 10pt,
+  fontupper = \itshape,
   halign = flush left}
 
 % ---------- Quantities ----------
@@ -201,18 +249,41 @@
 
 % ---------- Headings ----------
 % Myriad Pro Bold. Sections are unnumbered on the page; subsections show
-% "1.1" in gray.
+% "1.1" in beige.
 \RequirePackage{titlesec}
 \RequirePackage{needspace}
 \titleformat{\section}{\sffamily\bfseries\labfontsize{15}\RaggedRight}{}{0pt}{}
 \titleformat{\subsection}{\sffamily\bfseries\labfontsize{12}\RaggedRight}
-  {\textcolor{labEqNumber}{\thesubsection}}{0.4em}{}
+  {\textcolor{labAccent}{\thesubsection}}{0.4em}{}
 \titleformat{\subsubsection}{\sffamily\bfseries\labfontsize{11}\RaggedRight}
-  {\textcolor{labEqNumber}{\thesubsubsection}}{0.4em}{}
+  {\textcolor{labAccent}{\thesubsubsection}}{0.4em}{}
 \titlespacing*{\section}{0pt}{20pt plus 4pt minus 2pt}{6pt}
 \titlespacing*{\subsection}{0pt}{14pt plus 3pt minus 2pt}{4pt}
 \titlespacing*{\subsubsection}{0pt}{10pt plus 2pt minus 2pt}{3pt}
 \AddToHook{cmd/section/before}{\par\Needspace{\sectionneedspace}}
+% Starred sections go in the contents too: no section shows its number, so
+% the star only keeps the section counter where it is. The contents line is
+% handed to titlesec, which writes it where it writes a numbered section's;
+% that also gets hyperref to put a link target on the heading.
+\newif\if@labstarsection
+\NewCommandCopy\@labsection\section
+\RenewDocumentCommand\section{s o m}{%
+  \IfBooleanTF{#1}
+    {\global\@labstarsectiontrue\@labsection*{#3}}
+    {\IfValueTF{#2}{\@labsection[#2]{#3}}{\@labsection{#3}}}}
+\AddToHook{cmd/ttl@labelling/before}{%
+  \if@labstarsection
+    \global\@labstarsectionfalse
+    \def\ttl@savewrite{\addcontentsline{toc}{section}{\ttl@savetitle}%
+      \nobreak\global\let\ttl@savewrite\@empty}%
+  \fi}
+% \headlabel{Part~1}: a heading's lead, in beige and set off by a space
+% instead of a colon. The PDF bookmark gets it as plain text, and the
+% contents hang it in a column of its own. Defined at \begin{document} only
+% if the report hasn't defined its own \headlabel.
+\newcommand\@headlabel[1]{\textcolor{labAccent}{#1}\hspace{0.4em}}
+\AtBeginDocument{%
+  \@ifundefined{headlabel}{\DeclareRobustCommand\headlabel{\@headlabel}}{}}
 
 % ---------- Margin notes ----------
 % LaTeX moves a note down when it would overlap the one above it. (The
@@ -234,17 +305,20 @@
 
 % ---------- Figures and captions ----------
 % Figures and tables stay where they are written (no floating).
-% Captions: Minion italic 8.5 pt, left-aligned. Text-column captions sit in
-% the margin; margin and full-width captions sit below their content.
+% Captions: Minion italic 8.5 pt in warm gray, left-aligned, the label
+% ("Figure 3.") in beige. Text-column captions sit in the margin; margin and
+% full-width captions sit below their content.
 \RequirePackage{float}
 \floatplacement{figure}{H}
 \floatplacement{table}{H}
 \setlength{\intextsep}{10pt plus 2pt minus 2pt}
 \RequirePackage{caption}
 \DeclareCaptionFont{labcaption}{\fontsize{8.5}{11}\selectfont}
+\DeclareCaptionFont{labMuted}{\color{labMuted}}
+\DeclareCaptionFont{labAccent}{\color{labAccent}}
 \captionsetup{
-  font = {labcaption, it},
-  labelfont = {labcaption, it},
+  font = {labcaption, it, labMuted},
+  labelfont = {labcaption, it, labAccent},
   labelsep = period,
   justification = raggedright,
   singlelinecheck = false,
@@ -327,6 +401,9 @@
 % Tufte sample book's title page, but in normal case), the cover art (or a
 % large lab number when there is none), and a footer with the course, lab
 % number, instructor and date. No small capitals or letterspaced labels.
+% A 1/2 in dark brown bar runs down the left edge, and everything else starts
+% 5/8 in past it, at 1 1/8 in, so the cover is 6.75 in wide. With the
+% offwhitecover option the whole cover is filled with labCoverPaper first.
 % The report starts on page 2.
 \RequirePackage{tikz}
 \def\@course{ELT-1031}
@@ -347,29 +424,34 @@
   \thispagestyle{empty}%
   \begin{tikzpicture}[remember picture, overlay,
       x=1in, y=-1in, shift={(current page.north west)}]
+    % The paper, then the bar down the left edge
+    \if@offwhitecover
+      \fill[labCoverPaper] (0, 0) rectangle (8.5, 11);
+    \fi
+    \fill[labCoverBar] (0, 0) rectangle (0.5, 11);
     % Author, then the title
-    \node[anchor=base west, inner sep=0pt, text=labMuted] at (0.625, 0.95)
+    \node[anchor=base west, inner sep=0pt, text=labMuted] at (1.125, 0.95)
       {\itshape\fontsize{22}{26}\selectfont\@author};
-    \node[anchor=north west, inner sep=0pt, text width=6.5in, align=left]
-      at (0.625, 1.3)
+    \node[anchor=north west, inner sep=0pt, text width=6.75in, align=left]
+      at (1.125, 1.3)
       {\sffamily\bfseries\fontsize{46}{50}\selectfont\RaggedRight\@title\par
        \ifx\@subtitle\@empty\else
          \vspace{10pt}{\rmfamily\mdseries\itshape\fontsize{17}{21}\selectfont
          \color{labMuted}\@subtitle\par}\fi};
-    % Cover art, or the lab number in the house gray band color
+    % Cover art, or the lab number in the house band color
     \ifx\@coverart\@empty
       \node[anchor=south east, inner sep=0pt, text=labBand] at (7.875, 9.3)
         {\sffamily\bfseries\fontsize{300}{300}\selectfont\@labnumber};
     \else
-      \node[anchor=south west, inner sep=0pt] at (0.625, 9.3)
+      \node[anchor=south west, inner sep=0pt] at (1.125, 9.3)
         {\usebox\@coverbox};
     \fi
     % Footer: rule, then one line across the full width
     %   ELT-1031 · Lab 06 · prof. Ashworth                  2026-10-18
-    \draw[labRule, line width=0.6pt] (0.625, 9.6) -- (7.875, 9.6);
+    \draw[labRule, line width=0.6pt] (1.125, 9.6) -- (7.875, 9.6);
     \begin{scope}[every node/.style={inner sep=0pt,
         font=\fontsize{11}{13}\selectfont}]
-      \node[anchor=base west] at (0.625, 9.85)
+      \node[anchor=base west] at (1.125, 9.85)
         {\@course\@footsep Lab~\@labnumber\@footsep\@instructor};
       \node[anchor=base east] at (7.875, 9.85) {\@date};
     \end{scope}
@@ -397,7 +479,113 @@
   \renewcommand\footrulewidth{0pt}}
 \pagestyle{plain}
 
+% ---------- Contents ----------
+% \tableofcontents: a page of its own, after the cover. The column is as
+% wide as the text column but centered on the page, so both side margins
+% are 1 7/8 in, and it sits a little above the middle of the page.
+% "Contents" in Myriad Pro Bold, then each section in Myriad bold with its
+% subsections under it in Minion, their numbers in beige and the page
+% numbers flush right, and a light rule between sections like the rules
+% between table rows. Heading leads (\headlabel) hang in a column left of
+% the titles, as wide as the widest lead, so the titles line up.
+\newlength\contentswidth
+\setlength\contentswidth{\textwidth}
+\setcounter{tocdepth}{2}
+\newcommand\@tocsectionfont{\sffamily\bfseries\labfontsize{11.5}}
+\newcommand\@tocsubsectionfont{\labfontsize{10.5}}
+\newdimen\@tocleadwidth      % lead column, measured from the .toc
+\newdimen\@tocnumwidth       % subsection numbers
+\newdimen\@tocpagewidth      % page numbers, with the gap before them
+\@tocnumwidth=24pt
+\@tocpagewidth=0.35in
+% The widest lead in the last run's .toc, plus the gap after it.
+\newcommand\@measuretocleads{%
+  \global\@tocleadwidth\z@
+  \begingroup
+    \def\contentsline##1##2##3##4{\setbox\z@\hbox{##2}}%
+    \def\@headlabel##1{\setbox\tw@\hbox{\@tocsectionfont##1\hskip0.75em}%
+      \ifdim\wd\tw@>\@tocleadwidth \global\@tocleadwidth\wd\tw@\fi}%
+    \makeatletter
+    \InputIfFileExists{\jobname.toc}{}{}%
+  \endgroup}
+% The rule above every section but the first, midway between it and the
+% line above, across the whole column.
+\newif\if@tocfirst
+\newcommand\@tocrule{%
+  \if@tocfirst \global\@tocfirstfalse \else
+    \hskip-\leftskip\rlap{\raisebox{17.5pt}[0pt][0pt]{%
+      \color{labRowRule}\rule{\linewidth}{0.4pt}}}\hskip\leftskip
+  \fi}
+\newcommand\@tocheadlabel[1]{%
+  \llap{\hb@xt@\@tocleadwidth{\textcolor{labAccent}{#1}\hfil}}\ignorespaces}
+% \@tocentry{indent}{title}{page}: ragged title, page number flush right
+\newcommand\@tocentry[3]{%
+  \parindent\z@ \leftskip#1\relax
+  \rightskip\@tocpagewidth\@plus1fil \parfillskip-\@tocpagewidth
+  \leavevmode#2\nobreak\hfill\nobreak\hb@xt@\@tocpagewidth{\hss#3}\par}
+\renewcommand*\l@section[2]{%
+  \ifnum\c@tocdepth>\z@
+    \addpenalty\@secpenalty
+    \addvspace{14pt plus 2pt}%
+    \begingroup
+      \@tocsectionfont
+      \let\numberline\@gobble
+      \let\@headlabel\@tocheadlabel
+      \@tocentry\@tocleadwidth{\@tocrule#1}{\normalfont\labfontsize{11}#2}%
+    \endgroup
+    \nobreak
+  \fi}
+% Subsection page numbers are small and beige, in one of three places:
+%   \contentssubpages{inline}  right after the title (the default), so only
+%                              the sections' numbers stand at the right edge
+%   \contentssubpages{right}   at the right edge too, a step in from the
+%                              sections' numbers
+%   \contentssubpages{none}    left out, for a short report where they
+%                              mostly repeat their section's page
+\newcommand\contentssubpages[1]{%
+  \@ifundefined{@tocsubpage@#1}
+    {\ClassError{phelanlab}{Unknown \string\contentssubpages{#1}}
+       {Use inline, right or none.}}
+    {\def\@tocsubpages{#1}}}
+\newcommand\@tocsubpagefont{\labfontsize{9}\color{labAccent}}
+% \@tocsubpage@<style>{indent}{title}{page}
+\def\@tocsubpage@inline#1#2#3{%
+  \@tocentry{#1}{#2\nobreak\hskip0.6em{\@tocsubpagefont#3}}{}}
+\def\@tocsubpage@right#1#2#3{%
+  \@tocentry{#1}{#2}{{\@tocsubpagefont#3}\hskip12pt}}
+\def\@tocsubpage@none#1#2#3{\@tocentry{#1}{#2}{}}
+\contentssubpages{inline}
+\renewcommand*\l@subsection[2]{%
+  \ifnum\c@tocdepth>\@ne
+    \begingroup
+      \@tocsubsectionfont
+      \def\numberline##1{\hskip-\@tocnumwidth
+        \hb@xt@\@tocnumwidth{\textcolor{labAccent}{##1}\hfil}}%
+      \@nameuse{@tocsubpage@\@tocsubpages}%
+        {\dimexpr\@tocleadwidth+\@tocnumwidth\relax}{#1}{#2}%
+    \endgroup
+  \fi}
+\renewcommand\tableofcontents{%
+  \clearpage
+  \@measuretocleads
+  \begingroup
+    \setlength\parskip\z@
+    \begin{adjustwidth}
+        {\dimexpr(\paperwidth-\contentswidth)/2-1in-\hoffset-\oddsidemargin\relax}
+        {\dimexpr\textwidth-(\paperwidth+\contentswidth)/2+1in+\hoffset+\oddsidemargin\relax}
+      \vspace*{\stretch{1}}%
+      \pdfbookmark[1]{\contentsname}{contents}%
+      {\sffamily\bfseries\labfontsize{24}\contentsname\par}%
+      \vspace{14pt}%
+      \global\@tocfirsttrue
+      \@starttoc{toc}%
+      \vspace*{\stretch{1.6}}%
+    \end{adjustwidth}
+  \endgroup
+  \clearpage}
+
 % ---------- Links ----------
-\RequirePackage[hidelinks]{hyperref}
+\RequirePackage[hidelinks, linktoc=all]{hyperref}
+\pdfstringdefDisableCommands{\def\headlabel#1{#1 }}
 
 \endinput

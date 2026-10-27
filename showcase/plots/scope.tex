@@ -1,0 +1,159 @@
+% Part 4 scope figure: every PicoScope capture, a 4 x 2 grid that fills
+% one page. Rows are Circuits 1-4, columns charging and discharging. The
+% time axis of each row is in multiples of that circuit's nominal R*C, so
+% the 1-tau grid lines line up down the page.
+%
+% Data: data/scope-<c|d><n>.dat (and -zoom.dat for the insets) and
+% data/scope-values.tex, all written by make-scope-data.py. Traces are
+% shifted down by the scope's 0.408 V zero offset.
+%
+% Inset scale against its panel (\scW = 232 pt for 5.65 tau, inset 88 pt
+% for 0.42 tau): 232/5.65 = 41.1 pt per tau, 88/0.42 = 209.5 pt per tau,
+% so x5.1 in time. Vertically 124 pt for 17.3 V (7.2 pt/V) against 54 pt
+% for 2 V (27 pt/V), x3.8.
+%
+% Stopwatch times are from the Part IV tab of Phelan Lab 06 Data.xlsx, over
+% the nominal R*C: 49.66/47, 104.5/100, 154/147, 32.07/31.97.
+% Adjusted tau: (R || R_VM)/R = 9.598/10.598 = 0.9056.
+%
+% \scH sets the panel height; it is tuned so the figure and its caption
+% fill \textheight (see the \typeout below when changing it).
+\input{data/scope-values}
+\newlength{\scW}\setlength{\scW}{230pt}
+\newlength{\scH}\setlength{\scH}{117.5pt}
+\newlength{\scGap}\setlength{\scGap}{11pt}
+\newlength{\scCol}\setlength{\scCol}{16pt}
+
+\pgfplotsset{
+  scope/.style={
+    labplot, width=\scW, height=\scH,
+    xmin=-0.3, xmax=5.35, ymin=-0.7, ymax=16.6,
+    xtick={0,...,5}, ytick={0,4,8,12,16},
+    xticklabels={}, yticklabels={},
+    set layers=standard,
+  },
+  scope left/.style={yticklabels={0,4,8,12,16}},
+  scope unit/.style={ylabel={V},
+    ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=1pt}},
+  scope bottom/.style={
+    xticklabels={0,1\(\tau\),2\(\tau\),3\(\tau\),4\(\tau\),5\(\tau\)},
+    xlabel={Time from the switch flip, in multiples of each circuit's \(R \cdot C\)}},
+  scope inset/.style={
+    labplot, width=88pt, height=54pt,
+    xmin=0.79, xmax=1.21, xtick=\empty, ytick=\empty, grid=none,
+    axis background/.style={fill=white},
+    axis line style={chartText, line width=0.5pt},
+  },
+}
+\tikzset{
+  rc line/.style={chartText, line width=0.5pt},
+  adj line/.style={chartText, line width=0.5pt, dash pattern=on 2pt off 1.5pt},
+  tau level/.style={chartText, densely dotted, line width=0.4pt},
+  verdict/.style={tag, text=chartText},
+}
+% Legend samples, drawn with the panels' own styles. (Only in the legend
+% line: a \tikz nested inside an axis would pick up its coordinates.)
+\newcommand{\scsample}[1]{\tikz[baseline=-0.6ex]\draw[#1] (0,0) -- (13pt,0);}
+\newcommand{\taudot}{\tikz[baseline=-0.6ex]\fill[accent] (0,0) circle[radius=1.7pt];}
+\newcommand{\swmark}{\tikz[baseline=-0.6ex]\draw[chartText, line width=0.5pt]
+  (90:2.6pt) -- (210:2.6pt) -- (330:2.6pt) -- cycle;}
+
+% \scpanel{c|d}{circuit}{x}{y}{extra axis options}{stopwatch time / R*C, or empty}
+\newcommand{\scpanel}[6]{%
+  \edef\scK{#1#2}%
+  \edef\tauN{\csname scope-\scK-tau\endcsname}%
+  \edef\lvl{\csname scope-\scK-level\endcsname}%
+  \pgfmathsetmacro{\scLo}{\lvl-1}\pgfmathsetmacro{\scHi}{\lvl+1}%
+  \edef\scTaus{\csname scope-\scK-taus\endcsname}%
+  \edef\scErr{\csname scope-\scK-err\endcsname}%
+  \if c#1%
+    \def\scRef{13.59}\def\inanchor{south east}\def\iny{0.4}%
+    \def\tagy{9.0}\def\taganchor{south east}%
+  \else
+    \def\scRef{15.01}\def\inanchor{north east}\def\iny{14.4}%
+    \def\tagy{6.2}\def\taganchor{north east}%
+  \fi
+  \begin{axis}[scope, #5, name=p\scK, at={(#3,#4)}, anchor=north west]
+    \draw[level] (axis cs:-0.3,\scRef) -- (axis cs:5.35,\scRef);
+    \addplot[trace] table[x=x, y=v] {data/scope-\scK.dat};
+    \draw[zoom line] (axis cs:0.79,\scLo) rectangle (axis cs:1.21,\scHi);
+    \coordinate (\scK-btr) at (axis cs:1.21,\scHi);
+    \coordinate (\scK-bbr) at (axis cs:1.21,\scLo);
+    \coordinate (\scK-in) at (axis cs:5.22,\iny);
+    \node[verdict, anchor=\taganchor] at (axis cs:5.22,\tagy)
+      {\(\tau\) = \qty{\scTaus}{\second}
+       \textperiodcentered\ \qty{\scErr}{\percent} vs \(R \cdot C\)};
+  \end{axis}
+  \begin{axis}[scope inset, name=i\scK, at={(\scK-in)}, anchor=\inanchor,
+      ymin=\scLo, ymax=\scHi]
+    \draw[adj line] (axis cs:0.9056,\scLo) -- (axis cs:0.9056,\scHi);
+    \draw[rc line] (axis cs:1,\scLo) -- (axis cs:1,\scHi);
+    \draw[tau level] (axis cs:0.79,\lvl) -- (axis cs:1.21,\lvl);
+    \addplot[trace, line width=0.8pt] table[x=x, y=v] {data/scope-\scK-zoom.dat};
+    \ifx\relax#6\relax\else
+      \addplot[only marks, mark=triangle, mark size=2.6pt,
+        mark options={chartText, line width=0.5pt}] coordinates {(#6,8.59)};
+    \fi
+    \fill[accent] (axis cs:\tauN,\lvl) circle[radius=1.7pt];
+  \end{axis}
+  \draw[zoom line] (i\scK.north west) -- (\scK-btr);
+  \draw[zoom line] (i\scK.south west) -- (\scK-bbr);
+}
+
+\newdimen\scfigh
+\begin{tikzpicture}[execute at end picture={%
+    \pgfextracty{\scfigh}{\pgfpointdiff
+      {\pgfpointanchor{current bounding box}{south}}
+      {\pgfpointanchor{current bounding box}{north}}}%
+    \typeout{Scope figure: picture \the\scfigh, textheight \the\textheight}}]
+  \pgfmathsetlengthmacro{\colB}{\scW+\scCol}
+  \pgfmathsetlengthmacro{\rowH}{\scH+\scGap}
+
+  % ---- Legend and column headings ----
+  \node[note, anchor=south west, font=\sffamily\fontsize{8}{10}\selectfont]
+    at (-34pt, 34pt)
+    {\scsample{traceInk, line width=0.8pt}\ Scope trace
+     \qquad\taudot\ Measured \(\tau\): \qty{63.2}{\percent} of the way to the final voltage
+     \qquad\swmark\ Stopwatch, stopped at \qty{8.59}{\volt}\\[2pt]
+     \scsample{rc line}\ \(R \cdot C\)
+     \qquad\scsample{adj line}\ \((R \parallel R_{\mathrm{VM}}) \cdot C\), \(\tau\) adjusted for the meter
+     \qquad\scsample{level}\ \Vmax{} = \qty{13.59}{\volt} (charging), \Vs{} = \qty{15.01}{\volt} (discharging)};
+  \node[anchor=south west, font=\sffamily\bfseries\fontsize{9.5}{11}\selectfont]
+    at (0pt, 6pt) {Charging \textmd{\fontsize{8}{10}\selectfont\color{chartText}
+      \textperiodcentered\ \qty{1}{\mega\ohm} charges, \qty{47}{\ohm} discharges}};
+  \node[anchor=south west, font=\sffamily\bfseries\fontsize{9.5}{11}\selectfont]
+    at (\colB, 6pt) {Discharging \textmd{\fontsize{8}{10}\selectfont\color{chartText}
+      \textperiodcentered\ \qty{47}{\ohm} charges, \qty{1}{\mega\ohm} discharges}};
+
+  % ---- Row labels ----
+  \foreach \c/\cap/\rc [count=\r from 0] in
+      {1/\qty{47}{\micro\farad}/\qty{47}{\second},
+       2/\qty{100}{\micro\farad}/\qty{100}{\second},
+       3/\qty{147}{\micro\farad}/\qty{147}{\second},
+       4/\qty{31.97}{\micro\farad}/\qty{31.97}{\second}}
+    \node[rotate=90, anchor=south, align=center, inner sep=0pt]
+      at (-20pt, -\r*\rowH-0.5*\scH)
+      {{\sffamily\bfseries\fontsize{9.5}{11}\selectfont Circuit \c\ \textperiodcentered\ \cap}\\[1pt]
+       {\sffamily\fontsize{7.5}{9}\selectfont\color{chartText}\(R \cdot C\) = \rc}};
+
+  % ---- Panels ----
+  \scpanel{c}{1}{0pt}{0pt}{scope left, scope unit}{1.0566}
+  \scpanel{d}{1}{\colB}{0pt}{}{}
+  \scpanel{c}{2}{0pt}{-\rowH}{scope left}{1.045}
+  \scpanel{d}{2}{\colB}{-\rowH}{}{}
+  \scpanel{c}{3}{0pt}{-2*\rowH}{scope left}{1.0476}
+  \scpanel{d}{3}{\colB}{-2*\rowH}{}{}
+  \scpanel{c}{4}{0pt}{-3*\rowH}{scope left, scope bottom}{1.0031}
+  \ifcsname scope-d4-tau\endcsname
+    \scpanel{d}{4}{\colB}{-3*\rowH}{scope bottom}{}
+  \else
+    % Placeholder: the grid and time axis without a trace.
+    \begin{axis}[scope, scope bottom, name=pd4, at={(\colB,-3*\rowH)}, anchor=north west,
+        axis line style={labRule, line width=0.5pt, dashed}]
+      \node[note, align=center, fill=white, font=\sffamily\fontsize{8.5}{11}\selectfont]
+        at (axis cs:2.525,8) {\textbf{Not exported}\\
+          Saved only as \texttt{32s-d.psdata}, PicoScope's own format;\\
+          a CSV export fills this panel};
+    \end{axis}
+  \fi
+\end{tikzpicture}

@@ -13,6 +13,8 @@
         xlabel={Time (s)}, yticklabel style={text width=14pt, align=right},
         ylabel={#9}, ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=2pt},
         legend style={#8}, legend columns=1]
+      % Level first so the curves sit on top of it; the τ circles go last
+      \draw[level] (axis cs:0,#7) -- (axis cs:1000,#7);
       \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
         \edef\temp{\noexpand\addplot[theory=\c, domain=0:1000, forget plot]
           {#2};}\temp
@@ -26,9 +28,8 @@
       \addlegendimage{tauB, line width=0.55pt, mark=square*, mark size=1.5pt, mark options={fill=tauB, draw=white, line width=0.25pt}}
       \addlegendimage{tauC, line width=0.55pt, mark=triangle*, mark size=1.5pt, mark options={fill=tauC, draw=white, line width=0.25pt}}
       \addlegendimage{tauD, line width=0.55pt, mark=diamond*, mark size=1.5pt, mark options={fill=tauD, draw=white, line width=0.25pt}}
-      \legend{\(\tau\) = \qty{32}{\second} · Circuit 4, \(\tau\) = \qty{47}{\second} · Circuit 1,
+      \legend{\(\tau\) = \phantom{0}\qty{32}{\second} · Circuit 4, \(\tau\) = \phantom{0}\qty{47}{\second} · Circuit 1,
               \(\tau\) = \qty{100}{\second} · Circuit 2, \(\tau\) = \qty{147}{\second} · Circuit 3}
-      \draw[level] (axis cs:0,#7) -- (axis cs:1000,#7);
       \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
         \edef\temp{\noexpand\draw[\c, densely dotted, line width=0.5pt]
             (axis cs:\tau,#7) -- (axis cs:\tau,#3);

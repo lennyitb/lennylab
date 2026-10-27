@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """phelan-lab06.pdf -> pages/page-N.png for the README.
 
-Renders the cover and pages 2, 3 and 5 with pdftoppm and draws a hairline
+Renders the cover and pages 2, 3, 5 and 12 with pdftoppm and draws a hairline
 border inside each edge, so the white pages show their edges on a white
 background. GitHub shows README images 838 CSS px wide on desktop; at twice
 that, a 2 px border lands on whole screen pixels on a 2x display and matches
@@ -18,7 +18,7 @@ from PIL import Image, ImageDraw
 HERE = Path(__file__).resolve().parent
 PDF = HERE / "phelan-lab06.pdf"
 OUT = HERE / "pages"
-PAGES = [1, 2, 3, 5]
+PAGES = [1, 2, 3, 5, 12]
 WIDTH_PX = 1676            # 2 x 838 CSS px
 BORDER = (209, 217, 224)   # GitHub's --borderColor-default, #d1d9e0
 WIDTH = 2                  # px; 1 CSS px on GitHub

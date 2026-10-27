@@ -1,10 +1,13 @@
-% Chart styles for Lab 06: the house chart preamble plus one color and one
+% Chart styles for Lab 06: the house chart preamble plus one colour and one
 % mark per circuit. The circuits are ordered by time constant, so their
 % colors run light to dark with τ: 32 s, 47 s, 100 s, 147 s.
 \usepackage{pgfplots}
 \pgfplotsset{compat=1.18}
 \usetikzlibrary{patterns, arrows.meta}
 \usepackage[american]{circuitikz}
+% Smaller + and - inside the voltage-source circle than the default
+\ctikzset{bipoles/vsourceam/inner plus={$\scriptstyle +$},
+  bipoles/vsourceam/inner minus={$\scriptstyle\vphantom{+}-$}}
 
 \definecolor{traceInk}{HTML}{1C5CAB}    % measured data
 \definecolor{accent}{HTML}{EB6834}      % what the reader should notice
@@ -29,6 +32,7 @@
     tick label style={font=\sffamily\fontsize{7.5}{9}\selectfont, text=chartText},
     label style={font=\sffamily\fontsize{8}{9.5}\selectfont, text=chartText},
     /pgf/number format/assume math mode=true,
+    trace/.style={traceInk, line width=0.6pt},
     clip mode=individual,
   },
   % Formula as a thin line, the Multisim export as marks on it.
@@ -45,6 +49,20 @@
   tag/.style={font=\sffamily\bfseries\fontsize{7.5}{9}\selectfont, inner sep=1.5pt},
   dim/.style={{Stealth[length=3pt]}-{Stealth[length=3pt]}, chartText, line width=0.4pt},
   level/.style={chartText, dashed, line width=0.45pt},
+  zoom line/.style={chartText, line width=0.35pt},
   every picture/.append style={execute at begin picture={%
     \sisetup{mode=text, reset-text-family=false, reset-text-series=false}}},
+  probehead/.style={circle, draw=traceInk, fill=white, line width=0.5pt,
+    inner sep=0.6pt, minimum size=11pt, text=traceInk,
+    font=\sffamily\bfseries\fontsize{5.5}{6}\selectfont},
+  probename/.style={font=\sffamily\fontsize{7.5}{9}\selectfont, text=traceInk,
+    anchor=west, inner sep=1pt},
 }
+% Multisim AV probe on a horizontal wire: an arrowhead on the wire for the
+% current direction (+x, toward the capacitor) and a leader up to the probe
+% head, which reads the node voltage to ground. #1 wire point, #2 probe name.
+\newcommand{\avprobe}[2]{%
+  \fill[traceInk] #1 ++(0.1,0) -- ++(-0.2,0.075) -- ++(0,-0.15) -- cycle;
+  \draw[traceInk, line width=0.5pt] #1 -- ++(0.22,0.3)
+    node[probehead, anchor=south west] (ph) {AV};
+  \node[probename] at (ph.east) {#2};}

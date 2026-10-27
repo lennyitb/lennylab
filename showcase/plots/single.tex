@@ -3,22 +3,25 @@
 % (data/single-*.dat; t = 0 current set to 15 µA, the export writes 0).
 % At 1τ = 47 s: 15(1 - e^-1) = 9.48 V and 15 e^-1 = 5.52 µA; the export,
 % interpolated, reads 9.502 V and 5.498 µA.
+% Both axes use set layers so the right axis's line (drawn with the second
+% axis) goes under the vC trace from the first, as the left one does.
 \hspace*{\chartgutter}\begin{tikzpicture}[trim axis left]
-  \begin{axis}[labplot, width=268pt, height=126pt,
+  \begin{axis}[labplot, set layers=standard, width=268pt, height=126pt,
       xmin=0, xmax=1000, ymin=0, ymax=16,
       xtick={0,200,...,1000}, ytick={0,4,...,16},
       xlabel={Time (s)}, yticklabel style={text width=14pt, align=right},
       ylabel={V}, ylabel style={rotate=-90, at={(ticklabel cs:1)}, anchor=south, yshift=2pt},
       axis y line*=left]
+    % Drawn first so the voltage trace and its 1τ dot sit on top of it
+    \draw[level] (axis cs:47,0) -- (axis cs:47,16);
     \addplot[theory=traceInk, domain=0:1000] {15*(1-exp(-x/47))};
     \addplot[export=traceInk, mark=*] table[x=t, y=y] {data/single-v.dat};
-    \draw[level] (axis cs:47,0) -- (axis cs:47,16);
     \node[tag, text=chartText, anchor=south west] at (axis cs:47,14.6) {1$\tau$ = \qty{47}{\second}};
     \fill[traceInk] (axis cs:47,9.48) circle[radius=1.8pt];
     \node[note, anchor=west, text=traceInk] at (axis cs:60,9.6) {\qty{9.48}{\volt}};
     \node[tag, text=traceInk, anchor=north east] at (axis cs:990,14.4) {\(v_C\), left axis};
   \end{axis}
-  \begin{axis}[labplot, width=268pt, height=126pt,
+  \begin{axis}[labplot, set layers=standard, width=268pt, height=126pt,
       xmin=0, xmax=1000, ymin=0, ymax=16,
       ytick={0,4,...,16}, grid=none,
       axis x line=none, axis y line*=right,

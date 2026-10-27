@@ -1,8 +1,9 @@
 % ELT-1031 Lab 06 -- RC Transient Response
 % Showcase for phelanlab.cls.
 % Build: latexmk phelan-lab06.tex   (the .latexmkrc selects LuaLaTeX)
-% Plot data: python3 -I make-plot-data.py  (data/*.xlsx -> data/*.dat)
-\documentclass{phelanlab}
+% Plot data: python3 -I make-plot-data.py   (Multisim, data/*.xlsx -> data/*.dat)
+%            python3 -I make-scope-data.py  (PicoScope CSVs -> data/scope-*.dat)
+\documentclass[offwhitecover]{phelanlab}
 
 \graphicspath{{figures/}}
 \input{plots/styles}
@@ -12,8 +13,43 @@
 \newquantity{\Vs}{V}{S}
 \newquantity{\Vc}{V}{C}
 \newquantity{\Ic}{I}{C}
-\newquantity{\Ceq}{C}{EQ}
+\newquantity{\Ceq}{C}{eq}
+\newquantity{\Qt}{Q}{T}
+\newquantity{\Vm}{V}{M}
+\newquantity{\Vmax}{V}{MAX}
+\newquantity{\Rvm}{R}{VM}
+\newquantity{\Req}{R}{eq}
 \newcommand{\ntau}[1]{#1\(\tau\)}   % "1τ", "5τ"
+\newcommand{\RC}{\mbox{\(R \cdot C\)}}
+
+% Section headings with \raggedright, so a long one ("Part 4 Hardware
+% Verification ...") wraps instead of running into the margin; the class's
+% \RaggedRight has too little stretch to break it.
+\titleformat{\section}{\sffamily\bfseries\labfontsize{15}\raggedright}{}{0pt}{}
+
+% "Part N" as a heading's lead (the class's \headlabel, also used for the
+% appendix).
+\newcommand{\partlabel}[1]{\headlabel{Part~#1}}
+
+% A note still waiting on Lenny: amber, visible, deleted once answered.
+\NewTColorBox{fillin}{}{colback=labPendingBg, colframe=labPendingFg,
+  boxrule=0pt, leftrule=3pt, sharp corners, left=8pt, right=6pt, top=4pt,
+  bottom=4pt, boxsep=0pt, before skip=8pt, after skip=8pt,
+  fontupper=\color{labPendingFg}, halign=flush left}
+
+% Full-width floats: 4pt instead of the 10pt \intextsep below the caption,
+% since the next paragraph's \parskip already adds space. Before a heading
+% the heading's own space wins, and a [p] float has no space to trim.
+\makeatletter
+\newcommand\@trimbelowwide{%
+  \ifdim\lastskip>\z@\vskip-\lastskip\vskip 4pt plus 2pt\fi}
+\RenewDocumentEnvironment{figure*}{O{H}}
+  {\begin{figure}[#1]\begin{fullwidth}\@widecaptions}
+  {\end{fullwidth}\end{figure}\@trimbelowwide}
+\RenewDocumentEnvironment{table*}{O{H}}
+  {\begin{table}[#1]\begin{fullwidth}\@widecaptions}
+  {\end{fullwidth}\end{table}\@trimbelowwide}
+\makeatother
 
 \title{RC Transient Response}
 \author{Leonard H Phelan IV}
@@ -26,22 +62,18 @@
 
 \begin{document}
 \maketitle
+\tableofcontents
 
 % =====================================================================
-\section{Part I: Prelab Calculations}
+\section{\partlabel{1}Prelab Calculations}
 
-All four circuits charge through the same \qty{1}{\mega\ohm} from the same
-\qty{15}{\volt}, so the time constant is set by the capacitance alone:
-\qty{47}{\second}, \qty{100}{\second}, \qty{147}{\second} and
-\qty{32}{\second}. Every circuit reaches \qty{9.48}{\volt} after \ntau{1}
-charging and falls to \qty{5.52}{\volt} after \ntau{1} discharging, and the
-current starts at \qty{15}{\micro\ampere} in all four.
+All four circuits charge through the same \qty{1}{\mega\ohm} from the same \qty{15}{\volt}, so the time constant is set by the capacitance alone: \qty{47}{\second}, \qty{100}{\second}, \qty{147}{\second} and \qty{32}{\second}. Every circuit reaches \qty{9.48}{\volt} after \ntau{1} charging and falls to \qty{5.52}{\volt} after \ntau{1} discharging, and the current starts at \qty{15}{\micro\ampere} in all four.
 
-\begin{figure*}
+\begin{marginfigure}
   \input{plots/circuits}
-  \caption{The four RC circuits from the Part~I table, redrawn from the handout.}
+  \caption{The four RC circuits from the Part~1 table, redrawn from the handout, with the AV probes from the Part~2 Multisim build. Each probe reads its node's voltage to ground and the current in the direction of its arrow, into the capacitor, and is named for its circuit's time constant.}
   \label{fig:circuits}
-\end{figure*}
+\end{marginfigure}
 
 \subsection{Equivalent capacitance}
 
@@ -50,64 +82,40 @@ Capacitors in parallel add, so Circuit~3 is \qty{147}{\micro\farad}:
   \Ceq = \qty{47}{\micro\farad} + \qty{100}{\micro\farad} = \qty{147}{\micro\farad}
 \end{equation}
 
-Capacitors in series combine the way parallel resistors do, so Circuit~4 is
-smaller than either capacitor:
+Capacitors in series combine the way parallel resistors do, so Circuit~4 is smaller than either capacitor:
 \begin{equation}
-  \Ceq = \frac{(\qty{47}{\micro\farad})(\qty{100}{\micro\farad})}
+  \Ceq = \frac{\qty{47}{\micro\farad} \cdot \qty{100}{\micro\farad}}
               {\qty{47}{\micro\farad} + \qty{100}{\micro\farad}}
        = \qty{31.97}{\micro\farad} \approx \qty{32}{\micro\farad}
 \end{equation}
 
 \subsection{Time constants and expected values}
 
-With $R = \qty{1}{\mega\ohm}$, each microfarad adds one
-second,\sidenote{$\qty{1}{\mega\ohm} \times \qty{1}{\micro\farad}
-= \qty{e6}{\ohm} \times \qty{e-6}{\farad} = \qty{1}{\second}$.} so $\tau$ in
-seconds equals the capacitance in \unit{\micro\farad}:
+With $R = \qty{1}{\mega\ohm}$, each microfarad adds one second,\sidenote{$\qty{1}{\mega\ohm} \cdot \qty{1}{\micro\farad} = \qty{e6}{\ohm} \cdot \qty{e-6}{\farad} = \qty{1}{\second}$.} so $\tau$ in seconds equals the capacitance in \unit{\micro\farad}:
 \begin{equation}
-  \tau = RC = (\qty{1}{\mega\ohm})(\qty{47}{\micro\farad}) = \qty{47}{\second}
+  \tau = R \cdot C = \qty{1}{\mega\ohm} \cdot \qty{47}{\micro\farad} = \qty{47}{\second}
 \end{equation}
 
-While charging, the capacitor voltage climbs toward \Vs{} and gets
-\qty{63.2}{\percent} of the way there in one time constant:
+While charging, the capacitor voltage climbs toward \Vs{} and gets \qty{63.2}{\percent} of the way there in one time constant:
 \begin{equation}
   v_C(t) = \Vs\left(1 - e^{-t/\tau}\right) \qquad
   v_C(\tau) = 0.632 \cdot \qty{15}{\volt} = \qty{9.48}{\volt}
 \end{equation}
 
-\begin{margintable}[4pt]
-  \begin{marginlabtable}{X[0.5,l]X[1,r]X[1,r]}
-    Time & Charging & Discharging \\
-    \ntau{1} & \qty{9.48}{\volt} & \qty{5.52}{\volt} \\
-    \ntau{2} & \qty{12.97}{\volt} & \qty{2.03}{\volt} \\
-    \ntau{3} & \qty{14.25}{\volt} & \qty{0.75}{\volt} \\
-    \ntau{4} & \qty{14.73}{\volt} & \qty{0.27}{\volt} \\
-    \ntau{5} & \qty{14.90}{\volt} & \qty{0.10}{\volt} \\
-  \end{marginlabtable}
-  \caption{Capacitor voltage after each time constant, from \qty{15}{\volt}.
-    After \ntau{5} it is within \qty{0.7}{\percent} of the end value, the
-    usual point to call it fully charged or discharged.}
-  \label{tab:ntau}
-\end{margintable}%
-While discharging, it falls from its starting voltage and has
-\qty{36.8}{\percent} left after one time constant:
+While discharging, it falls from its starting voltage and has \qty{36.8}{\percent} left after one time constant:
 \begin{equation}
   v_C(t) = V_0\,e^{-t/\tau} \qquad
   v_C(\tau) = 0.368 \cdot \qty{15}{\volt} = \qty{5.52}{\volt}
 \end{equation}
 
-At $t = 0$ all \qty{15}{\volt} sits across the \qty{1}{\mega\ohm}: when
-charging because the empty capacitor acts as a short, and when discharging
-because the full capacitor is the source. That is the maximum current, and it
-decays with the same $\tau$ either way:
+At $t = 0$ all \qty{15}{\volt} sits across the \qty{1}{\mega\ohm}: when charging because the empty capacitor acts as a short, and when discharging because the full capacitor is the source. That is the maximum current, and it decays with the same $\tau$ either way:
 \begin{gather}
-  I_{C,\mathrm{max}} = \frac{\Vs}{R} = \frac{\qty{15}{\volt}}{\qty{1}{\mega\ohm}}
+  I_{C,\mathrm{MAX}} =\frac{\Vs}{R} = \frac{\qty{15}{\volt}}{\qty{1}{\mega\ohm}}
     = \qty{15}{\micro\ampere} \\
   i_C(\tau) = 0.368 \cdot \qty{15}{\micro\ampere} = \qty{5.52}{\micro\ampere}
 \end{gather}
 
-None of the voltages or currents depend on the capacitance; only the time it
-takes to reach them does (Table~\ref{tab:prelab}).
+None of the voltages or currents depend on the capacitance; only the time it takes to reach them does (Table~\ref{tab:prelab}).
 
 \begin{table*}
   \begin{labtable}{X[1.45]X[1]X[1]X[1.25]X[1.35]}
@@ -115,7 +123,7 @@ takes to reach them does (Table~\ref{tab:prelab}).
     Configuration & \qty{1}{\mega\ohm} + \qty{47}{\micro\farad}
       & \qty{1}{\mega\ohm} + \qty{100}{\micro\farad}
       & \qty{1}{\mega\ohm} + (\qty{47}{\micro\farad} $\parallel$ \qty{100}{\micro\farad})
-      & \qty{1}{\mega\ohm} + (\qty{47}{\micro\farad} in series with \qty{100}{\micro\farad}) \\
+      & {\qty{1}{\mega\ohm} + (\qty{47}{\micro\farad}\\ in series with \qty{100}{\micro\farad})} \\
     Capacitance & \qty{47}{\micro\farad} & \qty{100}{\micro\farad} & \qty{147}{\micro\farad} & \qty{31.97}{\micro\farad} \\
     $\tau = R \cdot C$ & \qty{47}{\second} & \qty{100}{\second} & \qty{147}{\second} & \qty{31.97}{\second} \\
     Source & \qty{15}{\volt} & \qty{15}{\volt} & \qty{15}{\volt} & \qty{15}{\volt} \\
@@ -125,224 +133,300 @@ takes to reach them does (Table~\ref{tab:prelab}).
     \Ic{} after \ntau{1} & \qty{5.52}{\micro\ampere} & \qty{5.52}{\micro\ampere} & \qty{5.52}{\micro\ampere} & \qty{5.52}{\micro\ampere} \\
     \Vc{} after \ntau{5}, charging & \qty{14.90}{\volt} & \qty{14.90}{\volt} & \qty{14.90}{\volt} & \qty{14.90}{\volt} \\
   \end{labtable}
-  \caption{Part~I prelab values. The last two rows are not in the handout's
-    table; Parts~II and~III use them.}
+  \caption{Part~1 prelab values. The last two rows are not in the handout's table; Parts~2 and~3 use them.}
   \label{tab:prelab}
 \end{table*}
 
 % =====================================================================
-\section{Part II: RC Transient Response (Charging)}
+\section{\partlabel{2}RC Transient Response (Charging)}
 
-In Multisim each capacitor reaches \qty{63.2}{\percent} of \qty{15}{\volt} at
-its own time constant. Circuits 1--3 match the calculated \qty{9.48}{\volt}
-and \qty{5.52}{\micro\ampere} within \qty{0.4}{\percent}; Circuit~4 reads
-\qty{1.7}{\percent} low on voltage and \qty{2.8}{\percent} high on current.
+In Multisim each capacitor reaches \qty{63.2}{\percent} of \qty{15}{\volt} at its own time constant. Circuits 1--3 match the calculated \qty{9.48}{\volt} and \qty{5.52}{\micro\ampere} within \qty{0.4}{\percent}; Circuit~4 reads \qty{1.7}{\percent} low on voltage and \qty{2.8}{\percent} high on current.
 
 \subsection{Multisim}
 
-Circuit~1 was built from the \qty{15}{\volt} source, \qty{1}{\mega\ohm} and
-\qty{47}{\micro\farad}, with an AV probe reading VDC and IDC and its arrow
-pointing into the capacitor. A Transient analysis ran to TSTOP =
-\qty{1000}{\second} with the initial conditions set to
-User-Defined.\sidenote{Multisim chose the spacing of the saved points
-itself: the export doubles from \qty{0.2}{\second} up to \qty{25.6}{\second},
-then holds \qty{20}{\second} apart.}
+Circuit~1 was built from the \qty{15}{\volt} source, \qty{1}{\mega\ohm} and \qty{47}{\micro\farad}, with an AV probe reading VDC and IDC and its arrow pointing into the capacitor. A Transient analysis ran to TSTOP = \qty{1000}{\second} with the initial conditions set to User-Defined.\sidenote{Multisim time period defaults were used, which turned out to be somewhat curious choices: the export doubles from \qty{0.2}{\second} up to \qty{25.6}{\second}, then holds \qty{20}{\second} apart.}
 
 The current trace
-\begin{marginfigure}
+\begin{marginfigure}[10pt]
   \includegraphics[width=\linewidth]{grapher-circuit1}
-  \caption{Multisim's Grapher with Circuit~1's two traces, before the
-    export. Cursor~1 at \qty{47.3}{\second} reads \qty{9.532}{\volt} and
-    \qty{5.468}{\micro\ampere}.}
+  \caption{Multisim's Grapher with Circuit~1's two traces, before the export. Cursor~1 at \qty{47.3}{\second} reads \qty{9.532}{\volt} and \qty{5.468}{\micro\ampere}.}
   \label{fig:grapher}
 \end{marginfigure}%
-was moved to a right-hand axis (Figure~\ref{fig:single}). Circuits 2--4 were
-then built beside it with each probe renamed to its time constant
-(Figure~\ref{fig:ms-charge}), and the analysis was re-run plotting the four
-voltages (Figure~\ref{fig:charge-v}) and then the four currents
-(Figure~\ref{fig:charge-i}). Instead of reading values off the Grapher's
-cursors, each plot was exported to Excel, and the values at \ntau{1} and
-\ntau{5} were interpolated between the two nearest exported points.
-
-\widefig{1}{multisim-charge}{Part~II circuits in Multisim. Each AV probe is
-  named for its circuit's time constant and points into the capacitor.}{fig:ms-charge}
+was moved to a right-hand axis (Figure~\ref{fig:grapher}, recreated in Figure~\ref{fig:single}). Circuits 2--4 were then built beside it with each probe renamed to its time constant (Figure~\ref{fig:circuits}), and the analysis was re-run plotting the four voltages (Figure~\ref{fig:charge-v}) and then the four currents (Figure~\ref{fig:charge-i}). Instead of reading values off the Grapher's cursors, each plot was exported to Excel, and the values at \ntau{1} and \ntau{5} were interpolated between the two nearest exported points.
 
 \begin{figure}
   \input{plots/single}
-  \caption{Circuit~1 charging: capacitor voltage and current, with
-    \ntau{1} = \qty{47}{\second} marked. Lines are calculated values; marks are the
-    exported points.}
+  \caption{Circuit~1 charging: capacitor voltage and current, with \ntau{1} = \qty{47}{\second} marked. Lines are calculated values; marks are the exported points.}
   \label{fig:single}
 \end{figure}
 
 \subsection{Results}
 
-For Circuit~1 alone, the exported data at \qty{47}{\second} reads
-\qty{9.502}{\volt} and \qty{5.498}{\micro\ampere}, within
-\qty{0.4}{\percent} of the calculated \qty{9.48}{\volt} and
-\qty{5.52}{\micro\ampere}. Circuits 2 and~3 agree as closely; Circuit~4 is
-the outlier (Table~\ref{tab:charge}).
+For Circuit~1 alone, the exported data at \qty{47}{\second} reads \qty{9.502}{\volt} and \qty{5.498}{\micro\ampere}, within \qty{0.4}{\percent} of the calculated \qty{9.48}{\volt} and \qty{5.52}{\micro\ampere}. Circuits 2 and~3 agree as closely; Circuit~4 is the outlier (Table~\ref{tab:charge}).
 
 \begin{table}
   \begin{labtable}{X[0.9]X[0.9]X[1.15]X[1]X[1.15]X[1]X[1.15]}
-    Circuit & $\tau$ (\unit{\second}) & \Vc{} at \ntau{1} (\unit{\volt}) & Error (\unit{\percent})
-      & \Ic{} at \ntau{1} (\unit{\micro\ampere}) & Error (\unit{\percent}) & \Vc{} at \ntau{5} (\unit{\volt}) \\
+    Circuit & {$\tau$\\(\unit{\second})} & {\Vc{} at \ntau{1}\\(\unit{\volt})} & {Error\\(\unit{\percent})}
+      & {\Ic{} at \ntau{1}\\(\unit{\micro\ampere})} & {Error\\(\unit{\percent})} & {\Vc{} at \ntau{5}\\(\unit{\volt})} \\
     1 & \num{47}    & \num{9.502} & \num{+0.23} & \num{5.498} & \num{-0.39} & \num{14.904} \\
     2 & \num{100}   & \num{9.474} & \num{-0.07} & \num{5.526} & \num{+0.12} & \num{14.900} \\
     3 & \num{147}   & \num{9.486} & \num{+0.06} & \num{5.514} & \num{-0.11} & \num{14.899} \\
     4 & \num{31.97} & \num{9.323} & \num{-1.66} & \num{5.677} & \num{+2.85} & \num{14.909} \\
   \end{labtable}
-  \caption{Multisim values at \ntau{1} and \ntau{5} while charging, from the
-    exported data. Errors are against the calculated \qty{9.48}{\volt} and
-    \qty{5.52}{\micro\ampere}; all four should read \qty{14.90}{\volt} at
-    \ntau{5}.}
+  \caption{Multisim values at \ntau{1} and \ntau{5} while charging, from the exported data. Errors are against the calculated \qty{9.48}{\volt} and \qty{5.52}{\micro\ampere}; all four should read \qty{14.90}{\volt} at \ntau{5}.}
   \label{tab:charge}
 \end{table}
 
 \begin{figure}
   \fourplot{charge-v}{15*(1-exp(-x/\tau))}{0}{16}{0,4,...,16}{0,4,8,12,16}{9.48}
     {at={(0.985,0.05)}, anchor=south east}{V}
-  \caption{Capacitor voltage while charging, all four circuits. Each crosses
-    \qty{9.48}{\volt} at its own time constant.}
+  \caption{Capacitor voltage while charging, all four circuits. Each crosses \qty{9.48}{\volt} at its own time constant.}
   \label{fig:charge-v}
 \end{figure}
 
 \begin{figure}
   \fourplot{charge-i}{15*exp(-x/\tau)}{0}{16}{0,4,...,16}{0,4,8,12,16}{5.52}
     {at={(0.985,0.95)}, anchor=north east}{\unit{\micro\ampere}}
-  \caption{Capacitor current while charging. Every circuit starts at
-    \qty{15}{\micro\ampere} and falls to \qty{5.52}{\micro\ampere} at its own
-    time constant.}
+  \caption{Capacitor current while charging. Every circuit starts at \qty{15}{\micro\ampere} and falls to \qty{5.52}{\micro\ampere} at its own time constant.}
   \label{fig:charge-i}
 \end{figure}
 
-Circuit~4 charged fastest and Circuit~3 slowest, the same order as their time
-constants: 32, 47, 100, then \qty{147}{\second}
-(Figure~\ref{fig:charge-v}). More capacitance takes longer to fill through the
-same \qty{1}{\mega\ohm}. All four reached the same voltage after \ntau{5},
-\qty{14.90}{\volt} within \qty{0.01}{\volt}; they just took between
-\qty{160}{\second} and \qty{735}{\second} to get there.
-
-The currents rank the same way (Figure~\ref{fig:charge-i}). They have to,
-because the current is set by the voltage still left across the resistor,
-$(\Vs - v_C) / R$. Once the capacitor is \qty{63.2}{\percent} charged, the
-current is down to \qty{36.8}{\percent} of its start, and every circuit starts
-at \qty{15}{\micro\ampere} because $R$ is the same. In each row of
-Table~\ref{tab:charge} the two readings add back to the source:
-$\qty{9.502}{\volt} + (\qty{5.498}{\micro\ampere})(\qty{1}{\mega\ohm}) =
-\qty{15.000}{\volt}$.
-
-Circuit~4's
+% Anchored a paragraph early so the figure fits beside the text it
+% illustrates instead of hanging off the bottom of the page.
 \begin{marginfigure}[2pt]
   \input{plots/interp}
-  \caption{Circuit~4 near its \ntau{1}. The export's nearest points are
-    \qty{20}{\second} apart, and the straight line between them passes
-    \qty{0.16}{\volt} under the curve at \qty{31.97}{\second}.}
+  \caption{Circuit~4 near its \ntau{1}. The export's nearest points are \qty{20}{\second} apart, and the straight line between them passes \qty{0.16}{\volt} under the curve at \qty{31.97}{\second}.}
   \label{fig:interp}
 \end{marginfigure}%
-error is in the export's point spacing, not the circuit. With TSTOP =
-\qty{1000}{\second}, Multisim saved points \qty{20}{\second} apart after the
-first \qty{25}{\second} (\qty{25.6}{\second}, \qty{45.6}{\second},
-\qty{65.6}{\second} and so on), so the export has no point at Circuit~4's
-\ntau{1} of \qty{32}{\second}. Its value there comes from a straight line
-between the points at \qty{25.6}{\second} and \qty{45.6}{\second}, and a
-\qty{20}{\second} gap is almost two-thirds of its $\tau$, so the line cuts
-under the curve (Figure~\ref{fig:interp}). The saved points themselves are
-within \qty{0.1}{\volt} of the formula. For Circuits 1--3 the same gap is a
-smaller fraction of $\tau$, and the error stays under \qty{0.4}{\percent}.
+Circuit~4 charged fastest and Circuit~3 slowest, the same order as their time constants: 32, 47, 100, then \qty{147}{\second} (Figure~\ref{fig:charge-v}). More capacitance takes longer to fill through the same \qty{1}{\mega\ohm}. All four reached the same voltage after \ntau{5}, \qty{14.90}{\volt} within \qty{0.01}{\volt}; they just took between \qty{160}{\second} and \qty{735}{\second} to get there.
+
+The currents decay in the same order (Figure~\ref{fig:charge-i}). They're shown to be inversely proportional to the capacitor voltage, $(\Vs - v_C) / R$. Once the capacitor is \qty{63.2}{\percent} charged, the current is down to \qty{36.8}{\percent} of its start, and every circuit starts at \qty{15}{\micro\ampere} because $R$ is the same.
+
+Circuit~4 has an outlying error but it's explained by the PicoScope export's point spacing. With TSTOP = \qty{1000}{\second}, Multisim saved points \qty{20}{\second} apart after the first \qty{25}{\second} (\qty{25.6}{\second}, \qty{45.6}{\second}, \qty{65.6}{\second} and so on), so the export has no point at Circuit~4's \ntau{1} of \qty{32}{\second}. Its value there was interpolated between the points at \qty{25.6}{\second} and \qty{45.6}{\second}. The curve bends enough over those \qty{20}{\second} that the straight line falls \qty{0.16}{\volt} under it (Figure~\ref{fig:interp}). The saved points themselves are within \qty{0.1}{\volt} of the formula. For Circuits 1--3 the same gap is a smaller fraction of $\tau$, and the error stays under \qty{0.4}{\percent}.
 
 % =====================================================================
-\section{Part III: RC Transient Response (Discharge)}
+\section{\partlabel{3}RC Transient Response (Discharge)}
 
-With the sources removed and every capacitor starting at \qty{15}{\volt}, each
-voltage falls to \qty{36.8}{\percent} at its own time constant. The readings
-mirror Part~II: every \ntau{1} voltage is \qty{15}{\volt} minus its charging
-value, and Circuit~3 again takes the longest and Circuit~4 the shortest.
+\begin{marginfigure}[-0.75in]
+  \input{plots/discharge-circuits}
+  \caption{Part~3 circuits, redrawn from the Multisim build. The sources are gone, each \qty{1}{\mega\ohm} sits across its capacitor, and the initial conditions (IC) stand in for the charge. Circuit~4's \qty{4.8}{\volt} and \qty{10.2}{\volt} add to \qty{15}{\volt}. The AV probes are where they were in Part~2, so the discharge current flows against their arrows.}
+  \label{fig:discharge-circuits}
+\end{marginfigure}
+
+With the sources removed and every capacitor starting at \qty{15}{\volt}, each voltage falls to \qty{36.8}{\percent} at its own time constant. The readings mirror Part~2: every \ntau{1} voltage is \qty{15}{\volt} minus its charging value, and Circuit~3 again takes the longest and Circuit~4 the shortest.
 
 \subsection{Multisim}
 
-The Part~II file was saved as a copy, the four sources were removed, and each
-\qty{1}{\mega\ohm} was moved across its capacitor as the discharge path
-(Figure~\ref{fig:ms-discharge}). An initial condition on each capacitor takes
-the place of the charging step: \qty{15}{\volt} on Circuits 1--3, including
-both capacitors in Circuit~3, since parallel capacitors share the same
-voltage.
+The Part~2 file was saved as a copy, the four sources were removed and replaced with a short (Figure~\ref{fig:discharge-circuits}). An initial condition on each capacitor takes the place of the charging step: \qty{15}{\volt} on Circuits 1--3, including both capacitors in Circuit~3, since parallel capacitors share the same voltage.
 
-Circuit~4's two capacitors are in series, so they hold the same charge, and
-the \qty{15}{\volt} splits between them in inverse proportion to capacitance:
+Circuit~4's two capacitors are in series, so each carries the full series charge \Qt{}, and the \qty{15}{\volt} splits between them in inverse proportion to capacitance:
 \begin{gather}
-  Q = \Ceq\Vs = (\qty{31.97}{\micro\farad})(\qty{15}{\volt}) = \qty{0.480}{\milli\coulomb} \\
+  \Qt = \Ceq \cdot \Vs = \qty{31.97}{\micro\farad} \cdot \qty{15}{\volt} =\qty{0.480}{\milli\coulomb} \\
   V_{\qty{100}{\micro\farad}} = \frac{\qty{0.480}{\milli\coulomb}}{\qty{100}{\micro\farad}} = \qty{4.80}{\volt}
   \qquad
   V_{\qty{47}{\micro\farad}} = \frac{\qty{0.480}{\milli\coulomb}}{\qty{47}{\micro\farad}} = \qty{10.20}{\volt}
 \end{gather}
 
-The smaller capacitor takes the larger share, and the two add back to
-\qty{15}{\volt}. The analysis was re-run to \qty{1000}{\second}, plotting the
-four voltages (Figure~\ref{fig:discharge-v}) and then the four currents
-(Figure~\ref{fig:discharge-i}). The probes were left as in Part~II, so the
-current now flows out of the capacitor against the arrow and reads negative.
-
-\widefig{1}{multisim-discharge}{Part~III circuits in Multisim. The sources are
-  gone, each \qty{1}{\mega\ohm} sits across its capacitor, and the initial
-  conditions (IC) stand in for the charge. Circuit~4's \qty{4.8}{\volt} and
-  \qty{10.2}{\volt} add to \qty{15}{\volt}.}{fig:ms-discharge}
+The smaller series capacitor has a larger voltage drop, and the two add back to \qty{15}{\volt}. The analysis was re-run to \qty{1000}{\second}, plotting the four voltages (Figure~\ref{fig:discharge-v}) and then the four currents (Figure~\ref{fig:discharge-i}). The probes were left as in Part~2, so the current now flows out of the capacitor against the arrow and reads negative.
 
 \subsection{Results}
 
-\begin{table}
-  \begin{labtable}{X[0.9]X[0.9]X[1.15]X[1]X[1.15]X[1]X[1.15]}
-    Circuit & $\tau$ (\unit{\second}) & \Vc{} at \ntau{1} (\unit{\volt}) & Error (\unit{\percent})
-      & \Ic{} at \ntau{1} (\unit{\micro\ampere}) & Error (\unit{\percent}) & \Vc{} at \ntau{5} (\unit{\volt}) \\
-    1 & \num{47}    & \num{5.498} & \num{-0.39} & \num{-5.498} & \num{-0.39} & \num{0.095} \\
-    2 & \num{100}   & \num{5.526} & \num{+0.12} & \num{-5.526} & \num{+0.12} & \num{0.100} \\
-    3 & \num{147}   & \num{5.514} & \num{-0.11} & \num{-5.514} & \num{-0.11} & \num{0.101} \\
-    4 & \num{31.97} & \num{5.677} & \num{+2.85} & \num{-5.677} & \num{+2.85} & \num{0.091} \\
-  \end{labtable}
-  \caption{Multisim values at \ntau{1} and \ntau{5} while discharging, from
-    the exported data. Errors are against the calculated \qty{5.52}{\volt} and
-    \qty{5.52}{\micro\ampere}, current by magnitude; all four should read about
-    \qty{0.10}{\volt} at \ntau{5}.}
-  \label{tab:discharge}
-\end{table}
+Circuit~3 took the longest to discharge and Circuit~4 the shortest (Figure~\ref{fig:discharge-v}), the same order as charging and for the same reason. More capacitance holds more charge at \qty{15}{\volt}, and the same \qty{1}{\mega\ohm} drains it no faster than \qty{15}{\micro\ampere}.
+
+The current curves rank the same way (Figure~\ref{fig:discharge-i}). With only the \qty{1}{\mega\ohm} resistor in the loop, the current is the capacitor voltage divided by \qty{1}{\mega\ohm},\sidenote{\qty{1}{\volt} across \qty{1}{\mega\ohm} is \qty{1}{\micro\ampere}.} so each current curve is its voltage curve flipped negative. That is why the \unit{\micro\ampere} readings in Table~\ref{tab:discharge} match the volt readings.
+
+Each \ntau{1} reading is the Part~2 value turned over, $\qty{5.498}{\volt} = \qty{15}{\volt} - \qty{9.502}{\volt}$ for Circuit~1 and likewise for the rest. Charging and discharging follow the same exponential, one rising toward \qty{15}{\volt} and the other falling toward \qty{0}{\volt}. Circuit~4's \qty{+2.85}{\percent} error comes from the same \qty{20}{\second} point spacing as in Part~2. Its \ntau{5} reading of \qty{0.091}{\volt} is close to the expected \qty{0.10}{\volt}. On a value that small, the percent error says more about the measurement technique.
 
 \begin{figure}
   \fourplot{discharge-v}{15*exp(-x/\tau)}{0}{16}{0,4,...,16}{0,4,8,12,16}{5.52}
     {at={(0.985,0.95)}, anchor=north east}{V}
-  \caption{Capacitor voltage while discharging. Each falls to
-    \qty{5.52}{\volt} at its own time constant.}
+  \caption{Capacitor voltage while discharging. Each falls to \qty{5.52}{\volt} at its own time constant.}
   \label{fig:discharge-v}
 \end{figure}
 
 \begin{figure}
   \fourplot{discharge-i}{-15*exp(-x/\tau)}{-16}{0}{-16,-12,...,0}{−16,−12,−8,−4,0}{-5.52}
     {at={(0.985,0.05)}, anchor=south east}{\unit{\micro\ampere}}
-  \caption{Capacitor current while discharging. Each starts at
-    \qty{-15}{\micro\ampere}, negative because the current now leaves the
-    capacitor against the probe arrow.}
+  \caption{Capacitor current while discharging. Each starts at \qty{-15}{\micro\ampere}, negative because the current now leaves the capacitor against the probe arrow.}
   \label{fig:discharge-i}
 \end{figure}
 
-Circuit~3 took the longest to discharge and Circuit~4 the shortest
-(Figure~\ref{fig:discharge-v}), the same order as charging and for the same
-reason. More capacitance holds more charge at \qty{15}{\volt}, and the same
-\qty{1}{\mega\ohm} drains it no faster than \qty{15}{\micro\ampere}.
+\begin{table}
+  \begin{labtable}{X[0.9]X[0.9]X[1.15]X[1]X[1.15]X[1]X[1.15]}
+    Circuit & {$\tau$\\(\unit{\second})} & {\Vc{} at \ntau{1}\\(\unit{\volt})} & {Error\\(\unit{\percent})}
+      & {\Ic{} at \ntau{1}\\(\unit{\micro\ampere})} & {Error\\(\unit{\percent})} & {\Vc{} at \ntau{5}\\(\unit{\volt})} \\
+    1 & \num{47}    & \num{5.498} & \num{-0.39} & \num{-5.498} & \num{-0.39} & \num{0.095} \\
+    2 & \num{100}   & \num{5.526} & \num{+0.12} & \num{-5.526} & \num{+0.12} & \num{0.100} \\
+    3 & \num{147}   & \num{5.514} & \num{-0.11} & \num{-5.514} & \num{-0.11} & \num{0.101} \\
+    4 & \num{31.97} & \num{5.677} & \num{+2.85} & \num{-5.677} & \num{+2.85} & \num{0.091} \\
+  \end{labtable}
+  \caption{Multisim values at \ntau{1} and \ntau{5} while discharging, from the exported data. Errors are against the calculated \qty{5.52}{\volt} and \qty{5.52}{\micro\ampere}, current by magnitude; all four should read about \qty{0.10}{\volt} at \ntau{5}.}
+  \label{tab:discharge}
+\end{table}
 
-The current curves rank the same way (Figure~\ref{fig:discharge-i}), and they
-have to: with only the \qty{1}{\mega\ohm} in the loop, the current is the
-capacitor voltage divided by \qty{1}{\mega\ohm}.\sidenote{One volt across
-\qty{1}{\mega\ohm} drives one microamp, so for these circuits volts and
-microamps are the same number.} Each current curve is its voltage curve
-flipped negative, which is why the readings in \unit{\micro\ampere} match the
-readings in volts in every row of Table~\ref{tab:discharge}.
+% =====================================================================
+\section{\partlabel{4}Hardware Verification of RC Transient Responses}
 
-Each \ntau{1} reading is the Part~II value turned over,
-$\qty{5.498}{\volt} = \qty{15}{\volt} - \qty{9.502}{\volt}$ for Circuit~1 and
-likewise for the rest. Charging and discharging follow the same exponential,
-one rising toward \qty{15}{\volt} and the other falling toward \qty{0}{\volt}.
-Circuit~4's \qty{+2.85}{\percent} is the same \qty{20}{\second} point spacing
-as in Part~II. At \ntau{5} it reads \qty{0.091}{\volt} against about
-\qty{0.10}{\volt}, but a percent error on a value that small mostly measures
-the interpolation.
+\begin{marginfigure}
+  \input{plots/meter}
+  \caption{Step~5's measurement, redrawn from the handout with the DMM drawn as its internal resistance. \Rvm{} and R13 form a voltage divider, so the meter reads only the voltage across \Rvm, \Vm, rather than that of the full \qty{15}{\volt} supply.}
+  \label{fig:meter}
+\end{marginfigure}%
+On the breadboard each capacitor still crossed the magic \qty{63.2}{\percent} figure close to its own \RC. The scope captures put six of the eight time constants within \qty{4.3}{\percent} under \RC, and the discharges of Circuits 1 and~4 \qty{5.9}{\percent} and \qty{3.3}{\percent} over it. Counting the meter's internal resistance, all of them should have come in \qty{9.4}{\percent} under, so the hardware ran slower than that prediction. The stopwatch times ran \qtyrange{0.3}{5.7}{\percent} long.
+
+\subsection{Calculation prep}
+
+On the DMM the supply read \qty{15.008}{\volt} straight from the \qty{+15}{\volt} rail to ground, and \qty{13.592}{\volt} through the \qty{1}{\mega\ohm} (Figure~\ref{fig:meter}). The second reading is lower because the DMM passes a small amount of current. Its internal resistance \Rvm{} draws \qty{1.42}{\micro\ampere} through the \qty{1}{\mega\ohm}, which drops \qty{1.42}{\volt}. The two resistors are a\pagebreak[3] voltage divider, so VDR solved for \Rvm{} gives the meter's resistance:\sidenote{\Rvm{} calculated to \qty{9.598}{\mega\ohm}, which is close to the handout's hint of about \qty{10}{\mega\ohm}.}
+\begin{gather}
+  \Vm = \Vs\,\frac{\Rvm}{\Rvm + R} \\
+  \Rvm = R\,\frac{\Vm}{\Vs - \Vm}
+       = \qty{1}{\mega\ohm} \cdot \frac{\qty{13.592}{\volt}}{\qty{15.008}{\volt} - \qty{13.592}{\volt}}
+       = \qty{9.598}{\mega\ohm}
+\end{gather}
+
+The DMM stays across the capacitor for the rest of Part~4, so the same divider sets the highest voltage the capacitor can reach through the \qty{1}{\mega\ohm}:
+\begin{equation}
+  \Vmax = \Vs\,\frac{\Rvm}{\Rvm + \qty{1}{\mega\ohm}}
+        = \qty{15.008}{\volt} \cdot \frac{\qty{9.598}{\mega\ohm}}{\qty{10.598}{\mega\ohm}}
+        = \qty{13.59}{\volt}
+\end{equation}
+This matches the step~5 reading, as the handout predicts. After one time constant the capacitor should reach \qty{63.2}{\percent} of \Vmax{}, or \qty{8.59}{\volt}, so the stopwatch was stopped at that voltage.
+
+\subsection{Charging}
+
+\begin{figure*}
+  \input{plots/bench}\par
+  \vspace{15.5pt}% the same drawing-to-caption gap as Figure 1
+  \caption{Part~4 circuits, redrawn from the handout (steps 8 and 14) with each DMM drawn as its internal resistance \Rvm{} (step 15). Circuits 2--4 put their capacitors in C13's and C14's place.}
+  \label{fig:bench}
+\end{figure*}
+
+The charging circuit from handout step~8 was wired with the \qty{1}{\mega\ohm} on one throw of the switch, the \qty{47}{\ohm} on the other, and the DMM across the capacitor (Figure~\ref{fig:bench}, left). In one position the capacitor charges through the \qty{1}{\mega\ohm}; in the other the \qty{47}{\ohm} empties it for the next run, with a time constant of only \qty{2.2}{\milli\second}. For each circuit the switch was flipped as the stopwatch started, and the stopwatch was stopped when the DMM read \qty{8.59}{\volt}. Each circuit was timed once (Table~\ref{tab:charge-hw}).
+
+Every charge and discharge was also recorded on a PicoScope, on its \qty{\pm 50}{\volt} range at \qty{50}{\second}/div, or \qty{100}{\second}/div for Circuit~3, whose \ntau{5} of \qty{735}{\second} would not fit on a \qty{500}{\second} screen. Instead of reading the scope's cursors, the CSV exports were analyzed: an exponential fitted to each capture gives the moment the switch flipped, the voltage the capacitor was heading for, and $\tau$ (Figure~\ref{fig:scope}).\sidenote[-36pt]{With the capacitor shorted through the \qty{47}{\ohm} the scope read \qty{0.41}{\volt}, so every trace is shifted down by that much. The \qty{\pm 50}{\volt} range moves in \qty{0.46}{\volt} steps; averaging the samples in each time bin smooths them out.}
+
+For the captures the DMM was removed and the scope was connected across the capacitor through a \texttimes 10 probe, so the scope runs and the stopwatch runs were separate runs. The probe and the scope's input together are \qty{10}{\mega\ohm}, which loads the circuit almost exactly as the DMM's \qty{9.6}{\mega\ohm} does: \Vmax{} becomes \qty{13.64}{\volt} instead of \qty{13.59}{\volt}.
+
+\begin{table*}
+  \begin{labtable}{X[2.1]X[1]X[1]X[1.2]X[1.2]}
+    & Circuit 1 & Circuit 2 & Circuit 3 & Circuit 4 \\
+    Resistance & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} \\
+    Capacitance & \qty{47}{\micro\farad} & \qty{100}{\micro\farad}
+      & \qty{147}{\micro\farad} (parallel) & \qty{31.97}{\micro\farad} (series) \\
+    $\tau = R \cdot C$ & \qty{47}{\second} & \qty{100}{\second} & \qty{147}{\second} & \qty{31.97}{\second} \\
+    Calculated \Vmax, charging & \qty{13.59}{\volt} & \qty{13.59}{\volt} & \qty{13.59}{\volt} & \qty{13.59}{\volt} \\
+    Calculated \Vc{} after \ntau{1}, charging & \qty{8.59}{\volt} & \qty{8.59}{\volt} & \qty{8.59}{\volt} & \qty{8.59}{\volt} \\
+    Measured $\tau$, stopwatch to \qty{63.2}{\percent} & \qty{49.66}{\second} & \qty{104.5}{\second} & \qty{154}{\second} & \qty{32.07}{\second} \\
+    Error, measured to calculated $\tau$ & \qty{+5.66}{\percent} & \qty{+4.50}{\percent} & \qty{+4.76}{\percent} & \qty{+0.30}{\percent} \\
+    Scope: time to \qty{8.59}{\volt} & \qty{48.3}{\second} & \qty{100.5}{\second} & \qty{148.7}{\second} & \qty{32.2}{\second} \\
+    Scope: fitted $\tau$ & \qty{45.0}{\second} & \qty{96.3}{\second} & \qty{143.8}{\second} & \qty{31.9}{\second} \\
+    Scope: final voltage & \qty{13.1}{\volt} & \qty{13.2}{\volt} & \qty{13.3}{\volt} & \qty{13.5}{\volt} \\
+  \end{labtable}
+  \caption{Part~4 charging data, the handout's table filled in. Errors are against $\tau = R \cdot C$, as the handout asks. The last three rows are from the scope captures and are not in the handout's table; the final voltage is where the fitted curve levels off.}
+  \label{tab:charge-hw}
+\end{table*}
+
+\subsection{Discharging}
+
+For the discharge runs the \qty{47}{\ohm} and \qty{1}{\mega\ohm} were swapped (Figure~\ref{fig:bench}, right). Now the capacitor charges through the \qty{47}{\ohm} within milliseconds, and it discharges through the \qty{1}{\mega\ohm} slowly enough to time. In the discharge position the DMM's \Rvm{} sits across the capacitor in parallel with the \qty{1}{\mega\ohm}, so the capacitor discharges through
+\begin{equation}
+  \Req = \qty{1}{\mega\ohm} \parallel \Rvm
+       = \frac{\qty{1}{\mega\ohm} \cdot \qty{9.598}{\mega\ohm}}{\qty{1}{\mega\ohm} + \qty{9.598}{\mega\ohm}}
+       = \qty{905.6}{\kilo\ohm}
+\end{equation}
+and every time constant is \qty{9.4}{\percent} shorter than \RC:
+\begin{equation}
+  \tau_{\mathrm{adj}} = \Req \cdot C = \qty{905.6}{\kilo\ohm} \cdot \qty{47}{\micro\farad} =\qty{42.57}{\second}
+\end{equation}
+
+\enlargethispage{\baselineskip}
+The discharges were not timed with the stopwatch; each measured $\tau$ in Table~\ref{tab:discharge-hw} is from its scope capture.
+
+\begin{table*}
+  \begin{labtable}{X[2.1]X[1]X[1]X[1.2]X[1.2]}
+    & Circuit 1 & Circuit 2 & Circuit 3 & Circuit 4 \\
+    Resistance & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} & \qty{1}{\mega\ohm} \\
+    Capacitance & \qty{47}{\micro\farad} & \qty{100}{\micro\farad}
+      & \qty{147}{\micro\farad} (parallel) & \qty{31.97}{\micro\farad} (series) \\
+    $\tau = R \cdot C$ & \qty{47}{\second} & \qty{100}{\second} & \qty{147}{\second} & \qty{31.97}{\second} \\
+    Calculated \Vc{} after \ntau{1}, discharging & \qty{5.52}{\volt} & \qty{5.52}{\volt} & \qty{5.52}{\volt} & \qty{5.52}{\volt} \\
+    Adjusted $\tau = \Req \cdot C$ & \qty{42.57}{\second} & \qty{90.56}{\second} & \qty{133.13}{\second} & \qty{28.96}{\second} \\
+    Measured $\tau$, scope to \qty{36.8}{\percent} & \qty{49.8}{\second} & \qty{96.8}{\second} & \qty{143.8}{\second} & \qty{33.0}{\second} \\
+    Error, measured to adjusted $\tau$ & \qty{+16.95}{\percent} & \qty{+6.87}{\percent} & \qty{+8.03}{\percent} & \qty{+14.08}{\percent} \\
+    Error, measured to $R \cdot C$ & \qty{+5.91}{\percent} & \qty{-3.21}{\percent} & \qty{-2.16}{\percent} & \qty{+3.34}{\percent} \\
+    Scope: starting voltage & \qty{14.9}{\volt} & \qty{14.9}{\volt} & \qty{14.9}{\volt} & \qty{14.9}{\volt} \\
+  \end{labtable}
+  \caption{Part~4 discharging data, the handout's table filled in. Measured $\tau$ is from the scope captures. The last two rows are not in the handout's table.}
+  \label{tab:discharge-hw}
+\end{table*}
+
+In this circuit the capacitor charges to the full \qty{15}{\volt}. The DMM forms a divider with the series resistor, and \qty{47}{\ohm} against \qty{9.6}{\mega\ohm} drops only \qty{73}{\micro\volt}, where the \qty{1}{\mega\ohm} dropped \qty{1.42}{\volt}. The scope agrees: before every discharge the capacitor sat at \qty{14.9}{\volt}, within one \qty{0.46}{\volt} step of the \qty{15.008}{\volt} supply.
+
+The meter's resistance still matters for the discharge, just not for its starting voltage. Once the switch flips, \Rvm{} is a second path for the charge to drain through, in parallel with the \qty{1}{\mega\ohm}, and it shortens $\tau$ by \qty{9.4}{\percent}. The \qty{36.8}{\percent} target does not change, because it is a fraction of the starting voltage, and that is the full \qty{15}{\volt}.
+
+\subsection{Results}
+
+\begin{figure*}[p]
+  \input{plots/scope}
+  \caption{Every Part~4 scope capture, shifted down by the scope's \qty{0.41}{\volt} zero offset and plotted against time from the switch flip in multiples of each circuit's \RC, so the \ntau{1} grid lines line up down the page. Six of the eight captures reach their \qty{63.2}{\percent} point between the meter-adjusted $\tau$ and \RC, nearer \RC; only the discharges of Circuits 1 and~4 run past it. Insets magnify the \ntau{1} crossing five times in time. The scope was not triggered by the switch, so each flip time is taken from the capture's fitted curve.}
+  \label{fig:scope}
+\end{figure*}
+
+Figure~\ref{fig:scope} puts all eight captures on one page, each row's time axis scaled to its own \RC{} so the \ntau{1} lines line up. Circuit~4 again charged fastest and Circuit~3 slowest, the same order as Parts~2 and~3, and on the scaled axes all eight curves have the same shape.
+
+The meter belongs in the charging prediction as much as the discharging one. While charging, the capacitor sees the \qty{1}{\mega\ohm} and \Rvm{} as a Thevenin resistance of the same \qty{905.6}{\kilo\ohm}, charging toward \Vmax{} instead of \qty{15}{\volt}. So both tables should be held to the adjusted $\tau$, and every capture came out slower than it, by \qtyrange{5.6}{10.2}{\percent} (\qty{14.1}{\percent} for Circuit~4's discharge and \qty{17}{\percent} for Circuit~1's).\sidenote{During the captures the probe's \qty{10}{\mega\ohm} stood in for \Rvm, making the resistance \qty{909}{\kilo\ohm} instead of \qty{905.6}{\kilo\ohm}. Against that the captures run \qtyrange{5.2}{9.8}{\percent} slow, and \qty{13.7}{\percent} and \qty{16.5}{\percent} for the discharges of Circuits 4 and~1.} Since \Rvm{} was measured, the rest is most likely the parts themselves: electrolytic capacitors are usually rated \qty{\pm 20}{\percent}, and capacitance 6 to \qty{10}{\percent} over the marked value would cover all but the discharges of Circuits 1 and~4. The \qty{1}{\mega\ohm}'s \qty{\pm 5}{\percent} could account for some of it too. Neither part was measured on its own, so the two can't be separated.
+
+% Anchored a paragraph early so the figure fits beside the Circuit 1
+% paragraph it illustrates instead of hanging off the bottom of the page.
+\begin{marginfigure}[16pt]
+  \input{plots/pairs}
+  \caption{Each circuit's fitted $\tau$ from the scope, charging against discharging, measured from \RC{} (solid) with the meter-adjusted $\tau$ dashed. The orange bar is the gap between the two; the tags give how much longer the discharge took, in seconds and percent.}
+  \label{fig:tau-pairs}
+\end{marginfigure}%
+The stopwatch errors are larger and all positive because the stopwatch was stopped at \qty{8.59}{\volt}, \qty{63.2}{\percent} of the calculated \Vmax. On the scope the charging curves level off lower, at about 13.1 to \qty{13.5}{\volt}, below even the \qty{13.64}{\volt} the probe alone allows. So \qty{8.59}{\volt} is 64 to \qty{66}{\percent} of the way and arrives 1 to \qty{7}{\percent} after $\tau$. Electrolytic capacitors leak a little current, which acts like one more resistor across the capacitor and pulls the divider's output down. Although they were separate runs, the stopwatch and the scope agree on when the capacitor reached \qty{8.59}{\volt} within about \qty{4}{\percent}. Near that point Circuit~3's curve climbs only \qty{0.03}{\volt} per second, so a tenth of a volt between the two runs or the two instruments moves the time by three seconds.
+
+Circuit~1 is the odd one: it discharged \qty{10.7}{\percent} slower than it charged, where Circuits 2 and~3 agree within \qty{0.5}{\percent} and Circuit~4 sits in between at \qty{3.5}{\percent} (Figure~\ref{fig:tau-pairs}). It can only be further understood with more trials.
+
+% =====================================================================
+\section*{Conclusion}
+
+\begin{marginfigure}
+  \input{plots/ceq}
+  \caption{\Ceq{} formulas for capacitors in both series and parallel. Both formulas (except for the series capacitance shortcut shown) are associative and commutative, and can therefore be repeated for an arbitrary number of elements.}
+  \label{fig:ceq}
+\end{marginfigure}
+
+\begin{question}
+  State which charges faster, a small capacitor or a large capacitor. Describe the effect of putting capacitors in parallel or series on the charging rate and total capacitance in the circuit.
+\end{question}
+\begin{answer}
+  The small capacitor charges faster. Through the same resistor $\tau = R \cdot C$ grows with $C$, so the \qty{32}{\micro\farad} series pair reached \qty{63.2}{\percent} in \qty{31.9}{\second} on the scope and the \qty{147}{\micro\farad} parallel pair took \qty{143.8}{\second}. Capacitors in parallel add, so the combination is larger than either one and charges more slowly. Capacitors in series combine the way parallel resistors do, so the combination is smaller than either one and charges faster. The time constants measured on the bench combine the same way: \qty{45.0}{\second} + \qty{96.3}{\second} = \qty{141.3}{\second} against \qty{143.8}{\second} measured in parallel, and the series formula gives \qty{30.7}{\second} against \qty{31.9}{\second} measured.
+\end{answer}
+
+\begin{question}
+  What effect does the time constant have on either charging or discharging? What effect would changing the value of resistance have on the time constant?
+\end{question}
+\begin{answer}
+  The time constant scales the capacitor's rate of approach to \qty{100}{\percent} charge. After \ntau{1} it is \qty{63.2}{\percent} charged or has \qty{36.8}{\percent} left, whatever $\tau$ is, and after \ntau{5} it is within \qty{0.7}{\percent} of the end value. A larger $\tau$ stretches the same curve out in time, which is why all eight captures look alike in Figure~\ref{fig:scope} once time is divided by \RC. Since $\tau = R \cdot C$, $\tau$ is proportional to $R$: doubling the resistance doubles it.
+\end{answer}
+
+% =====================================================================
+\section*{Errors and Difficulties}
+
+Each circuit was timed once with the stopwatch, so there is no spread to show how repeatable the times are, and the scope captures were also one run each. Multiple trials would generally shed more certainty on the experiment.
+
+The \qty{1}{\mega\ohm} charge/discharge resistor suits the stopwatch procedure, which needs time constants long enough to time by hand, but the scope procedure actually used could have employed a much smaller value. With \qty{10}{\kilo\ohm}, every $\tau$ would be under \qty{1.5}{\second}, a full charge and discharge of Circuit~3 would take about \qty{15}{\second} instead of \qty{25}{\minute}, and many more trials would fit in the same lab time.
+
+The scope's \qty{\pm 50}{\volt} range moves in \qty{0.46}{\volt} steps, about \qty{3}{\percent} of the signal, and it read \qty{0.41}{\volt} with the capacitor shorted. Averaging and the offset correction take care of both for $\tau$, which depends only on the curve's shape, but absolute voltages read from the scope, like the final voltages in Table~\ref{tab:charge-hw}, are only good to a couple of tenths of a volt. A smaller range would have given finer steps. The scope was also not triggered by the switch, so the flip time had to be found from each trace.
+
+% =====================================================================
+\clearpage
+\section*{\headlabel{Appendix}Multisim Screenshots}
+
+The Multisim originals of Figures~\ref{fig:circuits} and~\ref{fig:discharge-circuits}. Multisim default component names were unchanged; the redrawn figures copy all exactly.
+
+\widefig{1}{multisim-charge}{Part~2 circuits in Multisim. Each AV probe is named for its circuit's time constant and points into the capacitor.}{fig:ms-charge}
+
+\widefig{1}{multisim-discharge}{Part~3 circuits in Multisim, with the initial conditions (IC) on each capacitor.}{fig:ms-discharge}
 
 \end{document}

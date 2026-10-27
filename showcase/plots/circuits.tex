@@ -1,44 +1,50 @@
-% Figure 1: the four Part I circuits, redrawn from the handout's table.
+% Figure 1: the four Part 1 circuits, redrawn from the handout's table,
+% stacked for the margin.
 % Component names follow the handout (Circuit 3 is C6 ‖ C3; Circuit 4 is
-% C5 over C4). Each source is a 15 V battery with + at the top.
+% C5 over C4). Each source is a 15 V source with + at the top. The AV probes
+% are the Part 2 Multisim ones, named for each circuit's time constant.
 \begin{circuitikz}[x=1cm, y=1cm, font=\small,
     every label/.append style={font=\small}]
-  \ctikzset{bipoles/length=0.9cm, resistors/scale=0.8, capacitors/scale=0.8}
+  \ctikzset{bipoles/length=0.9cm, resistors/scale=0.8, capacitors/scale=0.8, sources/scale=1.2}
   \tikzset{head/.style={font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont,
       anchor=base west, inner sep=0pt}}
   % Circuit 1
   \begin{scope}[shift={(0,0)}]
     \node[head] at (0,3.3) {Circuit 1};
-    \draw (0,0) to[battery1, invert, l2_={V1 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
+    \draw (0,0) to[V, invert, l2_={V1 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
           to[R, l={R1}, a={\qty{1}{\mega\ohm}}] (2.4,2.4)
           to[cC, l2^={C1 and \qty{47}{\micro\farad}}, l2 valign=c] (2.4,0) -- (0,0)
           node[circ] {} node[ground] {};
+    \avprobe{(2.0,2.4)}{\qty{47}{\second}}
   \end{scope}
   % Circuit 2
-  \begin{scope}[shift={(4.45,0)}]
+  \begin{scope}[shift={(0,-4.35)}]
     \node[head] at (0,3.3) {Circuit 2};
-    \draw (0,0) to[battery1, invert, l2_={V2 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
+    \draw (0,0) to[V, invert, l2_={V2 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
           to[R, l={R2}, a={\qty{1}{\mega\ohm}}] (2.4,2.4)
           to[cC, l2^={C2 and \qty{100}{\micro\farad}}, l2 valign=c] (2.4,0) -- (0,0)
           node[circ] {} node[ground] {};
+    \avprobe{(2.0,2.4)}{\qty{100}{\second}}
   \end{scope}
   % Circuit 3: C6 and C3 in parallel
-  \begin{scope}[shift={(8.9,0)}]
+  \begin{scope}[shift={(0,-8.7)}]
     \node[head] at (0,3.3) {Circuit 3};
-    \draw (0,0) to[battery1, invert, l2_={V3 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
+    \draw (0,0) to[V, invert, l2_={V3 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
           to[R, l={R3}, a={\qty{1}{\mega\ohm}}] (1.9,2.4)
           to[cC, l2^={C6 and \qty{47}{\micro\farad}}, l2 valign=c, *-*] (1.9,0) -- (0,0)
           node[circ] {} node[ground] {};
     \draw (1.9,2.4) -- (3.5,2.4)
           to[cC, l2^={C3 and \qty{100}{\micro\farad}}, l2 valign=c] (3.5,0) -- (1.9,0);
+    \avprobe{(1.6,2.4)}{\qty{147}{\second}}
   \end{scope}
   % Circuit 4: C5 over C4, in series
-  \begin{scope}[shift={(14.25,0)}]
+  \begin{scope}[shift={(0,-13.05)}]
     \node[head] at (0,3.3) {Circuit 4};
-    \draw (0,0) to[battery1, invert, l2_={V4 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
+    \draw (0,0) to[V, invert, l2_={V4 and \qty{15}{\volt}}, l2 valign=c] (0,2.4)
           to[R, l={R4}, a={\qty{1}{\mega\ohm}}] (2.4,2.4)
           to[cC, l2^={C5 and \qty{100}{\micro\farad}}, l2 valign=c] (2.4,1.2)
           to[cC, l2^={C4 and \qty{47}{\micro\farad}}, l2 valign=c] (2.4,0) -- (0,0)
           node[circ] {} node[ground] {};
+    \avprobe{(2.0,2.4)}{\qty{32}{\second}}
   \end{scope}
 \end{circuitikz}

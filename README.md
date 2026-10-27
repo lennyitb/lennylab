@@ -4,10 +4,11 @@ My own LaTeX style for lab reports. The page layout is inspired by the Tufte-sty
 
 The sample below is a real report of mine, an RC transient lab. Its source and PDF are in [`showcase/`](showcase/).
 
-[![Cover: author, title and a full-page plot of four RC charging and discharging curves](showcase/pages/page-1.png)](showcase/phelan-lab06.pdf)
-[![Page 2: four circuit diagrams across the full width, equations, and a side note and table in the margin](showcase/pages/page-2.png)](showcase/phelan-lab06.pdf)
-[![Page 3: a full-width table, then text with a side note and a screenshot in the margin](showcase/pages/page-3.png)](showcase/phelan-lab06.pdf)
-[![Page 5: two plots with captions in the margin, and a close-up plot in the margin](showcase/pages/page-5.png)](showcase/phelan-lab06.pdf)
+[![Cover: author and title over a full-page plot of RC charging and discharging curves, on an off-white page](showcase/pages/page-1.png)](showcase/phelan-lab06.pdf)
+[![Page 2: the contents, centered on the page, with the parts in bold and the subsections' page numbers small and beige](showcase/pages/page-2.png)](showcase/phelan-lab06.pdf)
+[![Page 3: Part 1 with numbered equations, and four circuit diagrams with a caption and a footnote in the margin](showcase/pages/page-3.png)](showcase/phelan-lab06.pdf)
+[![Page 5: a full-width table and two plots with captions in the margin, and a close-up plot in the margin](showcase/pages/page-5.png)](showcase/phelan-lab06.pdf)
+[![Page 12: the conclusion's questions and answers, and the series and parallel capacitance formulas in the margin](showcase/pages/page-12.png)](showcase/phelan-lab06.pdf)
 
 ## Inside
 
@@ -16,6 +17,8 @@ The sample below is a real report of mine, an RC transient lab. Its source and P
 - `template/`: a blank report to start from
 
 It builds with LuaLaTeX and needs Minion Pro, Myriad Pro and STIX Two Math installed. The comments at the top of the class list its commands.
+
+The class option `offwhitecover` (`\documentclass[offwhitecover]{phelanlab}`) prints the cover on a warm off-white (`labOffWhite`, #FAF7F0) instead of white; the pages after it stay white.
 
 ## License
 

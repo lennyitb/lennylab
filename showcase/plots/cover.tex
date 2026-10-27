@@ -1,40 +1,48 @@
-% Cover art: all eight transients on one set of axes. Charging curves rise
-% toward 15 V and discharge curves fall toward 0 V; each pair crosses at
-% 7.5 V, at τ ln 2. The rings sit at 1τ (9.48 V rising, 5.52 V falling).
-% Marks are the Multisim exports. 7.25 in wide, about 5.4 in tall.
-\begin{tikzpicture}
-  \begin{axis}[labplot, width=7.25in, height=5.0in,
-      xmin=0, xmax=600, ymin=0, ymax=15.6,
-      axis lines=none, grid=none, clip=false]
-    \draw[labRule, line width=0.4pt] (axis cs:0,0) -- (axis cs:600,0);
-    \draw[labRowRule, line width=0.4pt, dashed] (axis cs:0,15) -- (axis cs:600,15);
-    \foreach \tau/\c in {31.97/tauA, 47/tauB, 100/tauC, 147/tauD} {
-      \edef\temp{%
-        \noexpand\addplot[\c, line width=1.1pt, samples=200, smooth, domain=0:600] {15*(1-exp(-x/\tau))};
-        \noexpand\addplot[\c, line width=1.1pt, samples=200, smooth, domain=0:600, opacity=0.45] {15*exp(-x/\tau)};
-        \noexpand\draw[\c, line width=0.9pt, fill=white] (axis cs:\tau,9.482) circle[radius=2.6pt];
-        \noexpand\draw[\c, line width=0.9pt, fill=white, opacity=0.6] (axis cs:\tau,5.518) circle[radius=2.6pt];
-      }\temp
-    }
-    \addplot[export=tauA, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-32.dat};
-    \addplot[export=tauB, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-47.dat};
-    \addplot[export=tauC, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-100.dat};
-    \addplot[export=tauD, mark=*, mark size=1.4pt] table[x=t, y=y, restrict x to domain=0:600] {data/charge-v-147.dat};
-    % Time constants, read off along the top
-    \foreach \tau/\c/\lab/\side in {31.97/tauA/32/south east, 47/tauB/47/south west,
-                                    100/tauC/100/south, 147/tauD/147/south} {
-      \edef\temp{\noexpand\draw[\c, line width=0.4pt, densely dotted]
-          (axis cs:\tau,9.482) -- (axis cs:\tau,16.6);
-        \noexpand\node[tag, text=\c, anchor=\side, inner sep=1pt] at (axis cs:\tau,16.6)
-          {\noexpand\qty{\lab}{\noexpand\second}};}\temp
-    }
-    \node[note, anchor=south west, inner sep=0pt] at (axis cs:0,17.6)
-      {\textcolor{chartText}{Time constant \(\tau = RC\), \(R = \qty{1}{\mega\ohm}\)}};
-    \node[note, anchor=north east] at (axis cs:600,14.6)
-      {\fontsize{9}{11}\selectfont\(v_C = \qty{15}{\volt}\,(1 - e^{-t/\tau})\)};
-    \node[note, anchor=south east] at (axis cs:600,0.5)
-      {\fontsize{9}{11}\selectfont\(v_C = \qty{15}{\volt}\,e^{-t/\tau}\)};
-    \node[note, anchor=north west] at (axis cs:0,-0.4) {0 s};
-    \node[note, anchor=north east] at (axis cs:600,-0.4) {600 s};
+% Cover art: the Part 4 scope captures, all on one set of axes in seconds
+% from the switch flip. Charging traces rise, discharging traces fall at
+% half strength; brown runs light to dark with τ (32, 47, 100, 147 s), from
+% tan to the cover bar's own brown. No labels: it is art, not a figure.
+% Behind it, a zoomed-in RC circuit in wide, faint lines: half a resistor
+% coming out from behind the bar, a wire across to 2/3 of the page, down
+% through a capacitor and off the bottom edge.
+% Data: python3 -I make-scope-data.py (data/scope-cover-*.dat). 6.75 x 5.2 in.
+% Colors, by τ: 32, 47, 100 and 147 s, then the circuit behind. Every
+% line ends in % so no space reaches the cover box.
+\definecolor{coverA}{HTML}{C4A27A}%
+\definecolor{coverB}{HTML}{A27B52}%
+\definecolor{coverC}{HTML}{7E5734}%
+\definecolor{coverD}{HTML}{5B3A22}% labCoverBar
+\definecolor{coverWire}{HTML}{ECE4D3}% a step darker for the off-white cover
+\begin{tikzpicture}[x=1in, y=1in]
+  % The circuit, in inches from the chart's bottom-left corner, which the
+  % class puts 1 1/8 in from the page's left edge and 1.7 in above its
+  % bottom. Clipped to the page right of the bar, and kept out of the
+  % picture's size.
+  \begin{scope}[overlay]
+    \clip (-0.625, -1.7) rectangle (7.375, 8);
+    \draw[coverWire, line width=0.2in, line join=round]
+      (-1.65, 6.55) -- (-1.1, 5.45) -- (-0.55, 6.55) -- (0, 5.45)
+      -- (0.55, 6.55) -- (1.1, 5.45) -- (1.375, 6) -- (4.54, 6) -- (4.54, 2.55);
+    \draw[coverWire, line width=0.2in] (3.74, 2.55) -- (5.34, 2.55);
+    \draw[coverWire, line width=0.2in] (3.74, 2.05) -- (5.34, 2.05);
+    \draw[coverWire, line width=0.2in] (4.54, 2.05) -- (4.54, -1.8);
+  \end{scope}
+  \begin{axis}[labplot, width=6.75in, height=5.2in,
+      xmin=0, xmax=270, ymin=0, ymax=15,
+      name=art, axis lines=none, grid=none]
+    \draw[labRule, line width=0.4pt] (axis cs:0,0) -- (axis cs:270,0);
+    \pgfplotsset{every axis plot/.append style={line width=1.3pt, mark=none}}
+    \IfFileExists{data/scope-cover-d4.dat}
+      {\addplot[coverA, opacity=0.5] table[x=x, y=v] {data/scope-cover-d4.dat};}{}
+    \addplot[coverB, opacity=0.5] table[x=x, y=v] {data/scope-cover-d1.dat};
+    \addplot[coverC, opacity=0.5] table[x=x, y=v] {data/scope-cover-d2.dat};
+    \addplot[coverD, opacity=0.5] table[x=x, y=v] {data/scope-cover-d3.dat};
+    \addplot[coverA] table[x=x, y=v] {data/scope-cover-c4.dat};
+    \addplot[coverB] table[x=x, y=v] {data/scope-cover-c1.dat};
+    \addplot[coverC] table[x=x, y=v] {data/scope-cover-c2.dat};
+    \addplot[coverD] table[x=x, y=v] {data/scope-cover-c3.dat};
   \end{axis}
-\end{tikzpicture}
+  % The picture is the chart box, exactly 6.75 in, whatever hangs outside.
+  \pgfresetboundingbox
+  \path[use as bounding box] (art.south west) rectangle (art.north east);
+\end{tikzpicture}%

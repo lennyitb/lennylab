@@ -1,0 +1,51 @@
+% Part 3 circuits, redrawn from the Multisim build: the Figure 1 circuits
+% with the sources removed and each 1 MΩ moved across its capacitor. Names
+% follow Figure 1 (the handout), not Multisim's own numbering. The initial
+% conditions (IC) stand in for the charge; Circuit 4's split is Q/C on each.
+% Probes stay where they were in Part 2, so discharge current reads negative.
+% Stacked for the margin on Figure 1's spacing.
+\begin{circuitikz}[x=1cm, y=1cm, font=\small,
+    every label/.append style={font=\small}]
+  \ctikzset{bipoles/length=0.9cm, resistors/scale=0.8, capacitors/scale=0.8}
+  \tikzset{head/.style={font=\sffamily\bfseries\fontsize{8.5}{10}\selectfont,
+      anchor=base west, inner sep=0pt}}
+  % Name, value and IC, centred on the capacitor like Figure 1's l2 labels
+  \newcommand{\capic}[3]{\renewcommand{\arraystretch}{0.92}%
+    \begin{tabular}[c]{@{}l@{}}#1\\\qty{#2}{\micro\farad}\\{\color{chartText}\footnotesize IC=\qty{#3}{\volt}}\end{tabular}}
+  % Circuit 1
+  \begin{scope}[shift={(0,0)}]
+    \node[head] at (0,3.3) {Circuit 1};
+    \draw (0,0) to[R, l2_={R1 and \qty{1}{\mega\ohm}}, l2 valign=c] (0,2.4) -- (2.4,2.4)
+          to[cC, l^={\capic{C1}{47}{15}}] (2.4,0) -- (0,0)
+          node[circ] {} node[ground] {};
+    \avprobe{(1.1,2.4)}{\qty{47}{\second}}
+  \end{scope}
+  % Circuit 2
+  \begin{scope}[shift={(0,-4.35)}]
+    \node[head] at (0,3.3) {Circuit 2};
+    \draw (0,0) to[R, l2_={R2 and \qty{1}{\mega\ohm}}, l2 valign=c] (0,2.4) -- (2.4,2.4)
+          to[cC, l^={\capic{C2}{100}{15}}] (2.4,0) -- (0,0)
+          node[circ] {} node[ground] {};
+    \avprobe{(1.1,2.4)}{\qty{100}{\second}}
+  \end{scope}
+  % Circuit 3: C6 and C3 in parallel, both at 15 V
+  \begin{scope}[shift={(0,-8.7)}]
+    \node[head] at (0,3.3) {Circuit 3};
+    \draw (0,0) to[R, l2_={R3 and \qty{1}{\mega\ohm}}, l2 valign=c] (0,2.4) -- (1.75,2.4)
+          to[cC, l^={\capic{C6}{47}{15}}, *-*] (1.75,0) -- (0,0)
+          node[circ] {} node[ground] {};
+    \draw (1.75,2.4) -- (3.5,2.4)
+          to[cC, l^={\capic{C3}{100}{15}}] (3.5,0) -- (1.75,0);
+    \avprobe{(0.8,2.4)}{\qty{147}{\second}}
+  \end{scope}
+  % Circuit 4: C5 over C4, in series; Q = 0.480 mC on each
+  \begin{scope}[shift={(0,-13.05)}]
+    \node[head] at (0,3.3) {Circuit 4};
+    % Stretched 0.6 below the others so the two three-line labels clear
+    \draw (0,-0.6) to[R, l2_={R4 and \qty{1}{\mega\ohm}}, l2 valign=c] (0,2.4) -- (2.4,2.4)
+          to[cC, l^={\capic{C5}{100}{4.8}}] (2.4,0.9)
+          to[cC, l^={\capic{C4}{47}{10.2}}] (2.4,-0.6) -- (0,-0.6)
+          node[circ] {} node[ground] {};
+    \avprobe{(1.1,2.4)}{\qty{32}{\second}}
+  \end{scope}
+\end{circuitikz}
