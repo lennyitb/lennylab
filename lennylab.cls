@@ -291,14 +291,15 @@
 % blank last page when the last page is full, so it isn't loaded.)
 \newcommand\marginfont{\fontsize{8.5}{11}\selectfont\RaggedRight
   \setlength{\parskip}{4pt}}
-% Superior figures from Minion Pro for note numbers.
+% Superior figures from Minion Pro for note numbers. In the margin the number
+% hangs into the gutter so the note's text lines up with unnumbered notes.
 \newcommand\@sidenotemark[1]{{\addfontfeatures{VerticalPosition=Superior}#1}}
 \newcounter{sidenote}
 \NewDocumentCommand\sidenote{o +m}{%
   \refstepcounter{sidenote}%
   \unskip\@sidenotemark{\thesidenote}%
   \marginpar{\marginfont\IfValueT{#1}{\vspace*{#1}}%
-    \@sidenotemark{\thesidenote}\,#2}}
+    \leavevmode\llap{\@sidenotemark{\thesidenote}\,}#2}}
 \NewDocumentCommand\marginnote{o +m}{%
   \marginpar{\marginfont\IfValueT{#1}{\vspace*{#1}}#2}}
 \let\footnote\sidenote
