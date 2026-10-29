@@ -66,3 +66,14 @@
   \draw[traceInk, line width=0.5pt] #1 -- ++(0.22,0.3)
     node[probehead, anchor=south west] (ph) {AV};
   \node[probename] at (ph.east) {#2};}
+% Scope probe in the same style: no current arrow, since a scope reads only
+% the node voltage, and a heartbeat trace in the head instead of AV.
+% #1 wire point, #2 channel name.
+\newcommand{\scopeprobe}[2]{%
+  \fill[traceInk] #1 circle[radius=0.035];
+  \draw[traceInk, line width=0.5pt] #1 -- ++(0.22,0.3)
+    node[probehead, anchor=south west] (ph) {};
+  \draw[traceInk, line width=0.45pt, line join=round]
+    ([xshift=-3.6pt]ph.center) -- ++(1.8pt,0) -- ++(0.7pt,2.4pt)
+    -- ++(1.1pt,-4.6pt) -- ++(0.9pt,3.4pt) -- ++(0.5pt,-1.2pt) -- ++(2.2pt,0);
+  \node[probename] at (ph.east) {#2};}

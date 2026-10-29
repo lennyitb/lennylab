@@ -1,0 +1,35 @@
+% Margin figure: automating the Part 4 bench. A function generator drives
+% relay K1, whose contacts take S1's place, so the capacitor charges from
+% the 15 V supply and discharges to ground through the same R. C is any of
+% the four circuits. The scope probe reads the capacitor voltage. Width fits
+% the 2.25 in margin.
+\begin{circuitikz}[x=1cm, y=1cm, font=\footnotesize, scale=1.2, transform shape,
+    every label/.append style={font=\footnotesize}]
+  \ctikzset{bipoles/length=0.8cm, resistors/scale=0.75, capacitors/scale=0.75,
+    sources/scale=1.1}
+  % xscale=-1 puts the pole (in) on the right, the throws on the left;
+  % out 1 sits level with the supply's top wire so it runs straight in
+  \node[spdt, xscale=-1, anchor=out 1] (K) at (1.45,2.2) {};
+  \draw (0,0) to[V, invert, l2_={V5 and \qty{15}{\volt}}, l2 valign=c] (0,2.2)
+        -- (K.out 1);
+  \draw (K.out 2) -- (K.out 2 |- 0,0);
+  \coordinate (top) at (4.1,0 |- K.in);
+  \draw (K.in) to[R, l2_={R and \qty{10}{\kilo\ohm}}, l2 valign=c] ++(1.1,0) coordinate (rend)
+        -- (top) to[cC, l^={C}] (top |- 0,0);
+  \draw (0,0) -- (top |- 0,0);
+  \draw (K.out 2 |- 0,0) node[circ] {} (0,0) node[circ] {} node[ground] {};
+  % relay coil, driven by the generator, linked to the contacts
+  \coordinate (blade) at ($(K.in)!0.5!(K.out 1)$);
+  \coordinate (cl) at ($(blade |- 0,2.95) + (-0.6,0)$);
+  \coordinate (cr) at ($(blade |- 0,2.95) + (0.6,0)$);
+  % drawn sideways, sqV's square wave would turn too, so the source is an
+  % empty circle with the wave drawn upright inside
+  \draw ($(cl) + (-1.2,0)$) coordinate (gl)
+        to[esource, l={FG}, n=fg] ($(cl) + (-0.2,0)$) -- (cl)
+        to[L, l={K1}] (cr) -- ++(0.3,0) -- ++(0,-0.2) node[ground] {};
+  \draw (gl) -- ++(0,-0.2) node[ground] {};
+  \draw[line width=0.5pt] ($(fg.center) + (-0.15,-0.08)$) -- ++(0.075,0) |- ++(0.15,0.16)
+        |- ++(0.075,-0.16);
+  \draw[dashed, gray, line width=0.4pt] (blade |- 0,2.8) -- (blade);
+  \scopeprobe{($(rend)+(0.2,0)$)}{CH A}
+\end{circuitikz}
